@@ -106,63 +106,63 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
                     "    Checking book -> publisher...\n", title="Message", form_color='STANDOUT', wrap=True, wide=False,)
         conn = config.conn
         cur = conn.cursor()
-        sqlQuery = "SELECT numeral, publisher_num FROM 'bookstore.book' ORDER BY id"
+        sqlQuery = "SELECT number, publisher_num FROM 'optidrome.book' ORDER BY id"
         cur.execute(sqlQuery)
         books = cur.fetchall()
         for book in books:
-            sqlQuery = "SELECT author_num FROM 'bookstore.book_author' WHERE book_num=?"
+            sqlQuery = "SELECT author_num FROM 'optidrome.book_author' WHERE book_num=?"
             try:
                 cur.execute(sqlQuery, (book[0],) )
                 authnum = cur.fetchone()[0]
             except TypeError:
-                bs.notify_OK("\n     Book with numeral " + str(book[0]) + " has no assigned author. ", "Message")
+                bs.notify_OK("\n     Book with number " + str(book[0]) + " has no assigned author. ", "Message")
                 continue
-            sqlQuery = "SELECT numeral, name FROM 'bookstore.author' WHERE numeral=?"
+            sqlQuery = "SELECT number, name FROM 'optidrome.patient' WHERE number=?"
             try:
                 cur.execute(sqlQuery, (authnum,) )
                 authnum = cur.fetchone()[0]
             except TypeError:
-                bs.notify_OK("\n     Author of book with numeral " + str(book[0]) + " was not found. ", "Message")
+                bs.notify_OK("\n     Author of book with number " + str(book[0]) + " was not found. ", "Message")
                 continue
-            sqlQuery = "SELECT numeral, name FROM 'bookstore.publisher' WHERE numeral=?"
+            sqlQuery = "SELECT number, name FROM 'optidrome.publisher' WHERE number=?"
             try:
                 cur.execute(sqlQuery, (book[1],) )
                 publnum = cur.fetchone()[0]
             except TypeError:
-                bs.notify_OK("\n     Publisher of book with numeral " + str(book[0]) + " was not found. ", "Message")
+                bs.notify_OK("\n     Publisher of book with number " + str(book[0]) + " was not found. ", "Message")
                 continue
         bs.notify("\n  Checking book -> book_warehouse -> warehouse...", title="Message", form_color='STANDOUT', wrap=True, wide=False)
         for book in books:
-            sqlQuery = "SELECT warehouse_num FROM 'bookstore.book_warehouse' WHERE book_num=?"
+            sqlQuery = "SELECT warehouse_num FROM 'optidrome.book_warehouse' WHERE book_num=?"
             cur.execute(sqlQuery, (book[0],) )
             warehouses_book = cur.fetchall()
             if len(warehouses_book) == 0:
-                bs.notify_OK("\n  Book with numeral " + str(book[0]) + " has no assigned warehouse. ", "Message")
+                bs.notify_OK("\n  Book with number " + str(book[0]) + " has no assigned warehouse. ", "Message")
                 continue
             for warehouse_book in warehouses_book:
-                sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE numeral=?"
+                sqlQuery = "SELECT number, code FROM 'optidrome.warehouse' WHERE number=?"
                 try:
                     cur.execute(sqlQuery, (warehouse_book[0],) )
                     whnum = cur.fetchone()[0]
                 except TypeError:
-                    bs.notify_OK("\n Warehouse of book with numeral " + str(book[0]) + " was not found. ", "Message")
+                    bs.notify_OK("\n Warehouse of book with number " + str(book[0]) + " was not found. ", "Message")
                     continue
         # 2.Check book_author -> book
         #         book_author -> author
         bs.notify("\n  Checking book_author -> book\n" + 
                     "  Checking book_author -> author...", title="Message", form_color='STANDOUT', wrap=True, wide=False)
-        sqlQuery = "SELECT id, book_num, author_num FROM 'bookstore.book_author' ORDER BY id"
+        sqlQuery = "SELECT id, book_num, author_num FROM 'optidrome.book_author' ORDER BY id"
         cur.execute(sqlQuery)
         books_authors = cur.fetchall()
         for book_author in books_authors:
-            sqlQuery = "SELECT numeral FROM 'bookstore.book' WHERE numeral=?"
+            sqlQuery = "SELECT number FROM 'optidrome.book' WHERE number=?"
             try:
                 cur.execute(sqlQuery, (book_author[1],) )
                 bknum = cur.fetchone()[0]
             except TypeError:
                 bs.notify_OK("\n  Book in book_author with id=" + str(book_author[0]) + " was not found. ", "Message")
                 continue
-            sqlQuery = "SELECT numeral FROM 'bookstore.author' WHERE numeral=?"
+            sqlQuery = "SELECT number FROM 'optidrome.patient' WHERE number=?"
             try:
                 cur.execute(sqlQuery, (book_author[2],) )
                 authnum = cur.fetchone()[0]
@@ -173,18 +173,18 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
         #         book_warehouse -> warehouse
         bs.notify("\n  Checking book_warehouse -> book\n" + 
                     "  Checking book_warehouse -> warehouse...", title="Message", form_color='STANDOUT', wrap=True, wide=False)
-        sqlQuery = "SELECT id, book_num, warehouse_num FROM 'bookstore.book_warehouse' ORDER BY id"
+        sqlQuery = "SELECT id, book_num, warehouse_num FROM 'optidrome.book_warehouse' ORDER BY id"
         cur.execute(sqlQuery)
         books_warehouses = cur.fetchall()
         for book_warehouse in books_warehouses:
-            sqlQuery = "SELECT numeral FROM 'bookstore.book' WHERE numeral=?"
+            sqlQuery = "SELECT number FROM 'optidrome.book' WHERE number=?"
             try:
                 cur.execute(sqlQuery, (book_warehouse[1],) )
                 bknum = cur.fetchone()[0]
             except TypeError:
                 bs.notify_OK("\n  Book in book_warehouse with id=" + str(book_author[0]) + " was not found. ", "Message")
                 continue
-            sqlQuery = "SELECT numeral FROM 'bookstore.warehouse' WHERE numeral=?"
+            sqlQuery = "SELECT number FROM 'optidrome.warehouse' WHERE number=?"
             try:
                 cur.execute(sqlQuery, (book_warehouse[2],) )
                 whnum = cur.fetchone()[0]
@@ -193,7 +193,7 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
                 continue
         # 4.Check book_author duplicates
         bs.notify("\n  Checking book_author duplicates...", title="Message", form_color='STANDOUT', wrap=True, wide=False)
-        sqlQuery = "SELECT id, book_num FROM 'bookstore.book_author' ORDER BY book_num"
+        sqlQuery = "SELECT id, book_num FROM 'optidrome.book_author' ORDER BY book_num"
         cur.execute(sqlQuery)
         books_authors = cur.fetchall()
         last_book = None
@@ -204,7 +204,7 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
                 if book_author[1] == last_book:
                     bs.notify_OK("\n  Book in book_author with id=" + str(book_author[0]) + " is duplicated.\n" + 
                                    "  (Duplicated record will be deleted)", "Message")
-                    sqlQuery = "DELETE FROM 'bookstore.book_author' WHERE id=?"
+                    sqlQuery = "DELETE FROM 'optidrome.book_author' WHERE id=?"
                     cur.execute(sqlQuery, (book_author[0], ) )
                     conn.commit()
                     continue
@@ -212,7 +212,7 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
                     last_book = book_author[1]
         # 5.Check book_warehouse duplicates
         bs.notify("\n  Checking book_warehouse duplicates...", title="Message", form_color='STANDOUT', wrap=True, wide=False)
-        sqlQuery = "SELECT id, book_num, warehouse_num FROM 'bookstore.book_warehouse' ORDER BY book_num, warehouse_num"
+        sqlQuery = "SELECT id, book_num, warehouse_num FROM 'optidrome.book_warehouse' ORDER BY book_num, warehouse_num"
         cur.execute(sqlQuery)
         books_warehouses = cur.fetchall()
         last_book = None
@@ -227,7 +227,7 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
                     if book_warehouse[2] == last_warehouse:
                         bs.notify_OK("\n  Book in book_warehouse with id=" + str(book_warehouse[0]) + " is duplicated.\n" + 
                                        "  (Duplicated record will be deleted)", "Message")
-                        sqlQuery = "DELETE FROM 'bookstore.book_warehouse' WHERE id=?"
+                        sqlQuery = "DELETE FROM 'optidrome.book_warehouse' WHERE id=?"
                         cur.execute(sqlQuery, (book_warehouse[0],) )
                         conn.commit()
                         continue
