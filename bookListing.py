@@ -211,8 +211,8 @@ class BookListingForm(npyscreen.FormBaseNew):
 
         if field.name == "Book filter:":
             tablefld = "'bookstore.Book'.book_title"
-        elif field.name == "Author filter:":
-            tablefld = "'bookstore.Author'.name"
+        elif field.name == "Patient filter:":
+            tablefld = "'optidrome.Patient'.name"
         elif field.name == "Publisher filter:":
             tablefld = "'bookstore.Publisher'.name"
         elif field.name == "Book genre filter:":
@@ -274,7 +274,7 @@ class BookListingForm(npyscreen.FormBaseNew):
         conn = config.conn 
         cur = conn.cursor()
 
-        flist = "'bookstore.Book'.book_title, 'bookstore.Author'.name, 'bookstore.Book'.year, 'bookstore.Publisher'.name, \
+        flist = "'bookstore.Book'.book_title, 'optidrome.Patient'.name, 'bookstore.Book'.year, 'bookstore.Publisher'.name, \
             'bookstore.Warehouse'.code, 'bookstore.Book'.genre_id"
         
         bookLikeSentence = self.get_fieldLikeSentence(self.bookFilterFld)
@@ -318,7 +318,7 @@ class BookListingForm(npyscreen.FormBaseNew):
             orderSentence += "'bookstore.Book'.book_title"
         elif self.orderFld.value == "Author and title":
             orderBy = "author"
-            orderSentence += "'bookstore.Author'.name, 'bookstore.Book'.book_title"
+            orderSentence += "'optidrome.Patient'.name, 'bookstore.Book'.book_title"
         elif self.orderFld.value == "Publisher and title":
             orderBy = "publisher"
             orderSentence += "'bookstore.Publisher'.name, 'bookstore.Book'.book_title"
@@ -333,7 +333,7 @@ class BookListingForm(npyscreen.FormBaseNew):
 
         sqlQuery = "SELECT "+flist+" FROM 'bookstore.Book_author' \
             INNER JOIN 'bookstore.Book' ON 'bookstore.Book'.numeral = 'bookstore.Book_author'.book_num \
-            INNER JOIN 'bookstore.Author' ON 'bookstore.Author'.numeral = 'bookstore.Book_author'.author_num \
+            INNER JOIN 'optidrome.Patient' ON 'optidrome.Patient'.numeral = 'bookstore.Book_author'.author_num \
             INNER JOIN 'bookstore.Publisher' ON 'bookstore.Publisher'.numeral = 'bookstore.Book'.publisher_num \
             LEFT JOIN 'bookstore.Book_warehouse' ON 'bookstore.Book_warehouse'.book_num = 'bookstore.Book_author'.book_num \
             LEFT JOIN 'bookstore.Warehouse' ON 'bookstore.Warehouse'.numeral = 'bookstore.Book_warehouse'.warehouse_num \

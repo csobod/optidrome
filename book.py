@@ -5,6 +5,7 @@
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
+#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
@@ -24,7 +25,7 @@ import bsWidgets as bs
 import config
 
 DATEFORMAT = config.dateFormat
-DBTABLENAME = "'bookstore.book'"
+DBTABLENAME = "'optidrome.book'"
 
 global form
 
@@ -73,7 +74,7 @@ class BookForm(npyscreen.FormBaseNew):
 
         # Form fields
 
-        self.numeralFld=self.add(bs.MyTitleText, name="Numeral:", value="", relx=10, rely=4, begin_entry_at=15, editable=False)
+        self.numberFld=self.add(bs.MyTitleText, name="Numeral:", value="", relx=10, rely=4, begin_entry_at=15, editable=False)
 
         self.bookTitleFld=self.add(bs.MyTitleText, name="Title:", value="", relx=10, rely=5, begin_entry_at=15, \
             fixed_length=False, editable=False)
@@ -81,7 +82,7 @@ class BookForm(npyscreen.FormBaseNew):
             begin_entry_at=15, fixed_length=False, editable=False)
 
         self.authorValues = self.get_all_authors()
-        self.authorFld=self.add(bs.TitleChooser, name="Author:", value="", values=self.authorValues, popupType="narrow", \
+        self.patientFld=self.add(bs.TitleChooser, name="Author:", value="", values=self.authorValues, popupType="narrow", \
             relx=10, rely=7, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
             height=0, max_height=0, check_value_change=True, editable=False)
         self.authorLabel=self.add(bs.MyFixedText, name="AuthorLabel", value="[+]", relx=58, rely=7, min_width=4, max_width=4, \
@@ -142,9 +143,9 @@ class BookForm(npyscreen.FormBaseNew):
         ".init and .create functions are only executed once. We need a function to execute every time we come from main_menu->selector."
         # Reload authors into the chooser field
         self.authorValues = self.get_all_authors()
-        chooser = self.authorFld.entry_widget
+        chooser = self.patientFld.entry_widget
         chooser.load_values(self.authorValues)
-        self.authorFld.update(clear=True)
+        self.patientFld.update(clear=True)
         # Reload publishers into the chooser field
         self.publisherValues = self.get_all_publishers()
         chooser = self.publisherFld.entry_widget
@@ -157,7 +158,7 @@ class BookForm(npyscreen.FormBaseNew):
         "Returns a list of authors from DB"
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT name FROM 'bookstore.Author' ORDER BY name")
+        cur.execute("SELECT name FROM 'optidrome.Patient' ORDER BY name")
         filerows = cur.fetchall()
         author_list = []
         for row in filerows:
@@ -173,7 +174,7 @@ class BookForm(npyscreen.FormBaseNew):
         "Returns a list of publishers from DB"
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT numeral, name FROM 'bookstore.Publisher' ORDER BY name")
+        cur.execute("SELECT numeral, name FROM 'optidrome.Publisher' ORDER BY name")
         filerows = cur.fetchall()
         publisher_list = []
         publisher_dict = {}
@@ -195,7 +196,7 @@ class BookForm(npyscreen.FormBaseNew):
         "Gets and returns all warehouses from the database."
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT code FROM 'bookstore.Warehouse' ORDER BY code")
+        cur.execute("SELECT code FROM 'optidrome.Warehouse' ORDER BY code")
         filerows = cur.fetchall()
         # We need PyICU (=icu) to order unicode strings in spanish+catalan
         collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
@@ -208,8 +209,8 @@ class BookForm(npyscreen.FormBaseNew):
         "Read all the warehouses of this book."
         conn = config.conn
         cur = conn.cursor()
-        book_num = self.numeralFld.value
-        sqlQuery = "SELECT warehouse_num FROM 'bookstore.book_warehouse' WHERE book_num=? ORDER BY warehouse_num"
+        book_num = self.numberFld.value
+        sqlQuery = "SELECT warehouse_num FROM 'optidrome.book_warehouse' WHERE book_num=? ORDER BY warehouse_num"
         cur.execute(sqlQuery, (book_num,) )
         filerows = cur.fetchall()
         warehousesField = self.set_warehouses_field(filerows)
@@ -222,7 +223,7 @@ class BookForm(npyscreen.FormBaseNew):
         whList = []
         count = 0
         for wh in filerows:
-            sqlQuery = "SELECT code FROM 'bookstore.warehouse' WHERE numeral=? ORDER BY numeral"
+            sqlQuery = "SELECT code FROM 'optidrome.warehouse' WHERE numeral=? ORDER BY numeral"
             cur.execute(sqlQuery, ( str(wh[0]),) )
             try:
                 filerow = cur.fetchone()
@@ -241,10 +242,10 @@ class BookForm(npyscreen.FormBaseNew):
 
     def backup_fields(self):
         "Fill backup variables"
-        self.bu_numeral = self.numeralFld.value
+        self.bu_numeral = self.numberFld.value
         self.bu_bookTitle = self.bookTitleFld.value
         self.bu_originalTitle = self.originalTitleFld.value
-        self.bu_author = self.authorFld.value
+        self.bu_author = self.patientFld.value
         self.bu_description = self.descriptionFld.value
         self.bu_isbn = self.isbnFld.value
         self.bu_year = self.yearFld.value
@@ -263,10 +264,10 @@ class BookForm(npyscreen.FormBaseNew):
                 if row[0] == id:
                     config.fileRow = []
                     config.fileRow.append(row[0])
-                    config.fileRow.append(int(self.numeralFld.value))
+                    config.fileRow.append(int(self.numberFld.value))
                     config.fileRow.append(self.bookTitleFld.value)
                     config.fileRow.append(self.originalTitleFld.value)
-                    config.fileRow.append(self.authorFld.value)
+                    config.fileRow.append(self.patientFld.value)
                     config.fileRow.append(self.descriptionFld.value)
                     config.fileRow.append(self.isbnFld.value)
                     config.fileRow.append(self.yearFld.value)
@@ -324,15 +325,15 @@ class BookForm(npyscreen.FormBaseNew):
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
         form.reload()   # reloading chooser fields, etc in case we've changed the other tables
         form.current_option = "Create"
-        form.numeralFld.editable = True
-        form.numeralFld.maximum_string_length = 6
-        form.numeralFld.value = str(form.get_last_numeral(DBTABLENAME) + 1)
+        form.numberFld.editable = True
+        form.numberFld.maximum_string_length = 6
+        form.numberFld.value = str(form.get_last_numeral(DBTABLENAME) + 1)
         form.bookTitleFld.editable = True
         form.bookTitleFld.value = ""
         form.originalTitleFld.editable = True
         form.originalTitleFld.value = ""
-        form.authorFld.editable = True
-        form.authorFld.value = ""
+        form.patientFld.editable = True
+        form.patientFld.value = ""
         form.descriptionFld.editable = True
         form.descriptionFld.value = ""
         form.isbnFld.editable = True
@@ -365,10 +366,10 @@ class BookForm(npyscreen.FormBaseNew):
         global form
         form.current_option = "Read"
         form.convertDBtoFields()
-        form.numeralFld.editable = False
+        form.numberFld.editable = False
         form.bookTitleFld.editable = False
         form.originalTitleFld.editable = False
-        form.authorFld.editable = False
+        form.patientFld.editable = False
         form.descriptionFld.editable = False
         form.isbnFld.editable = False
         form.yearFld.editable = False
@@ -395,11 +396,11 @@ class BookForm(npyscreen.FormBaseNew):
         form.reload()   # reloading chooser fields, etc in case we've changed other tables
         form.current_option = "Update"
         form.convertDBtoFields()
-        form.numeralFld.editable = True
-        form.numeralFld.maximum_string_length = 6
+        form.numberFld.editable = True
+        form.numberFld.maximum_string_length = 6
         form.bookTitleFld.editable = True
         form.originalTitleFld.editable = True
-        form.authorFld.editable = True
+        form.patientFld.editable = True
         form.descriptionFld.editable = True
         form.isbnFld.editable = True
         form.isbnFld.maximum_string_length = 17     # Four hyphens included
@@ -429,10 +430,10 @@ class BookForm(npyscreen.FormBaseNew):
         conn.execute('BEGIN EXCLUSIVE TRANSACTION')     # exclusive access starts here. Nothing else can r/w the DB.
         form.current_option = "Delete"
         form.convertDBtoFields()
-        form.numeralFld.editable = False
+        form.numberFld.editable = False
         form.bookTitleFld.editable = False
         form.originalTitleFld.editable = False
-        form.authorFld.editable = False
+        form.patientFld.editable = False
         form.descriptionFld.editable = False
         form.isbnFld.editable = False
         form.yearFld.editable = False
@@ -452,10 +453,10 @@ class BookForm(npyscreen.FormBaseNew):
 
     def convertDBtoFields(self):
         "Convert DB fields into screen fields (strings)."
-        self.numeralFld.value = str(config.fileRow[1])
+        self.numberFld.value = str(config.fileRow[1])
         self.bookTitleFld.value = config.fileRow[2]
         self.originalTitleFld.value = config.fileRow[3]
-        self.authorFld.value = self.selectorForm.get_author_name(config.fileRow[1])
+        self.patientFld.value = self.selectorForm.get_author_name(config.fileRow[1])
         self.descriptionFld.value = config.fileRow[5]
         self.isbnFld.value = config.fileRow[6]
         self.yearFld.value = str(config.fileRow[7])
@@ -470,10 +471,10 @@ class BookForm(npyscreen.FormBaseNew):
 
     def strip_fields(self):
         "Required trimming of leading and trailing spaces."
-        self.numeralFld.value = self.numeralFld.value.strip()
+        self.numberFld.value = self.numberFld.value.strip()
         self.bookTitleFld.value = self.bookTitleFld.value.strip()
         self.originalTitleFld.value = self.originalTitleFld.value.strip()
-        self.authorFld.value = self.authorFld.value.strip()
+        self.patientFld.value = self.patientFld.value.strip()
         self.descriptionFld.value = self.descriptionFld.value.strip()
         self.isbnFld.value = self.isbnFld.value.strip()
         self.yearFld.value = self.yearFld.value.strip()
@@ -487,10 +488,10 @@ class BookForm(npyscreen.FormBaseNew):
         "Save new record (from Create) to global variable."
         config.fileRow = []
         config.fileRow.append(None)    # ID field is incremental, fulfilled later
-        config.fileRow.append(int(self.numeralFld.value))
+        config.fileRow.append(int(self.numberFld.value))
         config.fileRow.append(self.bookTitleFld.value)
         config.fileRow.append(self.originalTitleFld.value)
-        config.fileRow.append(self.authorFld.value)
+        config.fileRow.append(self.patientFld.value)
         config.fileRow.append(self.descriptionFld.value)
         config.fileRow.append(self.isbnFld.value)
         config.fileRow.append(int(self.yearFld.value))
@@ -516,7 +517,7 @@ class BookForm(npyscreen.FormBaseNew):
             if self.exist_changes():
                 self.save_mem_record()  # backup record in config variable
                 self.save_created_book()
-                self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
             else:
                 self.exitBook(modified=False)
 
@@ -532,12 +533,12 @@ class BookForm(npyscreen.FormBaseNew):
    
     def readOnlyOKbtn_function(self):
         "OK button function under Read mode."
-        self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+        self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
         self.exitBook(modified=False)
 
     def readOnlyCancelbtn_function(self):
         "Cancel button function under Read mode."
-        self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+        self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
         self.exitBook(modified=False)
 
     def delete_book(self):
@@ -570,12 +571,12 @@ class BookForm(npyscreen.FormBaseNew):
             config.fileRow = []
         
         # Delete book_author relationship table row(s)
-        sqlQuery = "DELETE FROM 'bookstore.book_author' WHERE book_num = " + str(numeral)
+        sqlQuery = "DELETE FROM 'optidrome.book_author' WHERE book_num = " + str(numeral)
         cur.execute(sqlQuery)
         conn.commit()
 
         # Delete book_warehouse relationship table row(s)
-        sqlQuery = "DELETE FROM 'bookstore.book_warehouse' WHERE book_num = " + str(numeral)
+        sqlQuery = "DELETE FROM 'optidrome.book_warehouse' WHERE book_num = " + str(numeral)
         cur.execute(sqlQuery)
         conn.commit()
 
@@ -617,13 +618,13 @@ class BookForm(npyscreen.FormBaseNew):
 
         # Mandatory values check:
         emptyField = False
-        if self.numeralFld.value == "":
+        if self.numberFld.value == "":
             emptyField = True
             self.editw = self.get_editw_number("Numeral:") - 1
         elif self.bookTitleFld.value == "":  
             emptyField = True
             self.editw = self.get_editw_number("Title:") - 1
-        elif self.authorFld.value == "":  
+        elif self.patientFld.value == "":  
             emptyField = True
             self.editw = self.get_editw_number("Author:") - 1
         elif self.isbnFld.value == "":  
@@ -654,13 +655,13 @@ class BookForm(npyscreen.FormBaseNew):
         
         # wrong value check: numeral field
         try:
-            a = int(self.numeralFld.value)
+            a = int(self.numberFld.value)
         except ValueError:
             self.editw = self.get_editw_number("Numeral:") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Numeral must be integer"
             return errorMsg
-        if len(self.numeralFld.value) > self.numeralFld.maximum_string_length:
+        if len(self.numberFld.value) > self.numberFld.maximum_string_length:
             self.editw = self.get_editw_number("Numeral:") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Numeral maximum length exceeded"
@@ -696,11 +697,11 @@ class BookForm(npyscreen.FormBaseNew):
             return errorMsg
 
         # repeated value check: numeral and isbn fields
-        if self.numeralFld.value != self.bu_numeral or self.isbnFld.value != self.bu_isbn:
+        if self.numberFld.value != self.bu_numeral or self.isbnFld.value != self.bu_isbn:
             for row in config.fileRows:
                 self.ok_button.editing = False
                 # Already exists and it's not itself
-                if row[1] == int(self.numeralFld.value) and self.numeralFld.value != self.bu_numeral:
+                if row[1] == int(self.numberFld.value) and self.numberFld.value != self.bu_numeral:
                     self.editw = self.get_editw_number("Numeral:") - 1
                     errorMsg = "Error:  Numeral already exists"
                     return errorMsg
@@ -713,10 +714,10 @@ class BookForm(npyscreen.FormBaseNew):
     def exist_changes(self):
         "Checking for changes to the fields."
         exist_changes = False
-        if self.numeralFld.value != self.bu_numeral or \
+        if self.numberFld.value != self.bu_numeral or \
             self.bookTitleFld.value != self.bu_bookTitle or \
             self.originalTitleFld.value != self.bu_originalTitle or \
-            self.authorFld.value != self.bu_author or \
+            self.patientFld.value != self.bu_author or \
             self.descriptionFld.value != self.bu_description or \
             self.isbnFld.value != self.bu_isbn or \
             self.yearFld.value != self.bu_year or \
@@ -745,10 +746,10 @@ class BookForm(npyscreen.FormBaseNew):
         message = "\n  Publisher was not found. Create it as a new one?"
         if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
             return None
-        num = self.get_last_numeral("'bookstore.publisher'") + 1
+        num = self.get_last_numeral("'optidrome.publisher'") + 1
         conn = config.conn
         cur = conn.cursor()
-        sqlQuery = "INSERT INTO 'bookstore.publisher' (numeral,name,address,phone,url) VALUES (?,?,?,?,?)"
+        sqlQuery = "INSERT INTO 'optidrome.publisher' (numeral,name,address,phone,url) VALUES (?,?,?,?,?)"
         values = (num, self.publisherFld.value, "", "", "")  # some fields are filled empty
         cur.execute(sqlQuery, values)
         conn.commit()
@@ -762,16 +763,16 @@ class BookForm(npyscreen.FormBaseNew):
         cur = conn.cursor()
         # Check if author exists, to create intermediate book_author table:
         try:
-            sqlQuery = "SELECT id, numeral, name FROM 'bookstore.author' WHERE name=?"
-            cur.execute(sqlQuery, (self.authorFld.value,) )
+            sqlQuery = "SELECT id, numeral, name FROM 'optidrome.patient' WHERE name=?"
+            cur.execute(sqlQuery, (self.patientFld.value,) )
             row = cur.fetchone()
-            self.author_numeral = row[1]
+            self.patient_number = row[1]
         except TypeError:   # author does not exist
             message = "\n   Author was not found. Create it as a new one?"
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                self.author_numeral = self.get_last_numeral("'bookstore.author'") + 1
-                sqlQuery = "INSERT INTO 'bookstore.author' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
-                values = (int(self.author_numeral), self.authorFld.value, "", "", "")  # some fields are filled empty
+                self.patient_number = self.get_last_numeral("'optidrome.patient'") + 1
+                sqlQuery = "INSERT INTO 'optidrome.patient' (number, name, dob, address, phone, email) VALUES (?,?,?,?,?,?)"
+                values = (int(self.patient_number), self.patientFld.value, "", "", "")  # some fields are filled empty
                 cur.execute(sqlQuery, values)
                 conn.commit()
                 bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
@@ -780,8 +781,8 @@ class BookForm(npyscreen.FormBaseNew):
                 return
 
         # creation of book_author intermediate table
-        sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
-        values = (int(self.numeralFld.value), int(self.author_numeral), 1)
+        sqlQuery = "INSERT INTO 'optidrome.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
+        values = (int(self.numberFld.value), int(self.patient_number), 1)
         cur.execute(sqlQuery, values)
         conn.commit()
         conn.isolation_level = None     # free the multiuser lock
@@ -798,7 +799,7 @@ class BookForm(npyscreen.FormBaseNew):
         price = float(Decimal(price))
         columns = " (numeral,book_title,original_title,description,isbn,year,publisher_num,creation_date,genre_id,cover_type,price) "
         sqlQuery = "INSERT INTO " + DBTABLENAME + columns + " VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-        values = (int(self.numeralFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, \
+        values = (int(self.numberFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, \
             self.isbnFld.value, int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price)
         cur.execute(sqlQuery, values)
         conn.commit()
@@ -813,17 +814,17 @@ class BookForm(npyscreen.FormBaseNew):
                 if wh == "":    # clean up the list for extra commas
                     continue
                 try:
-                    sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE code=?"
+                    sqlQuery = "SELECT numeral, code FROM 'optidrome.warehouse' WHERE code=?"
                     cur.execute(sqlQuery, (wh.strip(),) )
                     row = cur.fetchone()
                     warehouse_num = row[0]  # jumps to except if does not exist
                     # Create the book_warehouse if it doesn't exist:
-                    sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
-                    cur.execute(sqlQuery, (self.numeralFld.value, str(warehouse_num),) )
+                    sqlQuery = "SELECT * FROM 'optidrome.book_warehouse' WHERE book_num=? AND warehouse_num=?"
+                    cur.execute(sqlQuery, (self.numberFld.value, str(warehouse_num),) )
                     row = cur.fetchone()
                     if row == None:   # book_warehouse does not exist, create it
-                        sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
-                        values = (int(self.numeralFld.value), int(warehouse_num), None, None)
+                        sqlQuery = "INSERT INTO 'optidrome.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
+                        values = (int(self.numberFld.value), int(warehouse_num), None, None)
                         cur.execute(sqlQuery, values)
                         conn.commit()
                 except TypeError:   # warehouse does not exist, we don't create it at this point.
@@ -834,10 +835,10 @@ class BookForm(npyscreen.FormBaseNew):
         # update config.fileRows:
         new_record = []
         new_record.append(config.fileRow[0])
-        new_record.append(int(self.numeralFld.value))
+        new_record.append(int(self.numberFld.value))
         new_record.append(self.bookTitleFld.value)
         new_record.append(self.originalTitleFld.value)
-        new_record.append(self.authorFld.value)
+        new_record.append(self.patientFld.value)
         new_record.append(self.descriptionFld.value)
         new_record.append(self.isbnFld.value)
         new_record.append(self.yearFld.value)
@@ -856,12 +857,12 @@ class BookForm(npyscreen.FormBaseNew):
         cur = conn.cursor()
 
         # if numeral has changed (already checked for non-existence), update book_author and book_warehouse intermediate tables
-        if self.numeralFld.value != self.bu_numeral:
+        if self.numberFld.value != self.bu_numeral:
 
             columns = "book_num=?"
-            new_numeral = int(self.numeralFld.value)
+            new_numeral = int(self.numberFld.value)
             old_numeral = int(self.bu_numeral)
-            sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
+            sqlQuery = "UPDATE 'optidrome.book_author' SET " + columns + " WHERE book_num=?"
             values = (new_numeral, old_numeral)
             try:
                 cur.execute(sqlQuery, values)
@@ -870,24 +871,24 @@ class BookForm(npyscreen.FormBaseNew):
                 bs.notify_OK("\n     Numeral of book already exists. ", "Message")
                 return
 
-            sqlQuery = "UPDATE 'bookstore.book_warehouse' SET " + columns + " WHERE book_num=?"
+            sqlQuery = "UPDATE 'optidrome.book_warehouse' SET " + columns + " WHERE book_num=?"
             values = (new_numeral, old_numeral)
             cur.execute(sqlQuery, values)
             conn.commit()
 
         # Check if author has changed, and if exists, to update intermediate book_author table
-        if self.authorFld.value != self.bu_author:
+        if self.patientFld.value != self.bu_author:
             try:
-                sqlQuery = "SELECT id, numeral, name FROM 'bookstore.author' WHERE name=?"
-                cur.execute(sqlQuery, (self.authorFld.value,) )
+                sqlQuery = "SELECT id, numeral, name FROM 'optidrome.patient' WHERE name=?"
+                cur.execute(sqlQuery, (self.patientFld.value,) )
                 row = cur.fetchone()
-                self.author_numeral = row[1]
+                self.patient_number = row[1]
             except TypeError:   # author does not exist
                 message = "\n   Author was not found. Create it as a new one?"
                 if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                    self.author_numeral = self.get_last_numeral("'bookstore.author'") + 1
-                    sqlQuery = "INSERT INTO 'bookstore.author' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
-                    values = (self.author_numeral, self.authorFld.value, "", "", "")  # some fields are filled empty
+                    self.patient_number = self.get_last_numeral("'optidrome.patient'") + 1
+                    sqlQuery = "INSERT INTO 'optidrome.patient' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
+                    values = (self.patient_number, self.patientFld.value, "", "", "")  # some fields are filled empty
                     cur.execute(sqlQuery, values)
                     conn.commit()
                     bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
@@ -897,17 +898,17 @@ class BookForm(npyscreen.FormBaseNew):
             # update of book_author intermediate table
             try:
                 columns = "book_num=?, author_num=?, is_main_author=?"
-                if self.numeralFld.value == self.bu_numeral:
-                    numeral = int(self.numeralFld.value)
+                if self.numberFld.value == self.bu_numeral:
+                    numeral = int(self.numberFld.value)
                 else:
                     numeral = int(self.bu_numeral)
-                sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
-                values = (numeral, self.author_numeral, 1, numeral)
+                sqlQuery = "UPDATE 'optidrome.book_author' SET " + columns + " WHERE book_num=?"
+                values = (numeral, self.patient_number, 1, numeral)
                 cur.execute(sqlQuery, values)
                 conn.commit()
             except TypeError:   # book_author does not exist, create it
-                sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
-                values = (int(self.numeralFld.value), self.author_numeral, 1)
+                sqlQuery = "INSERT INTO 'optidrome.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
+                values = (int(self.numberFld.value), self.patient_number, 1)
                 cur.execute(sqlQuery, values)
                 conn.commit()
 
@@ -927,17 +928,17 @@ class BookForm(npyscreen.FormBaseNew):
                 if wh == "":    # clean up the list for extra commas
                     continue
                 try:
-                    sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE code=?"
+                    sqlQuery = "SELECT numeral, code FROM 'optidrome.warehouse' WHERE code=?"
                     cur.execute(sqlQuery, ( wh.strip(),) )
                     row = cur.fetchone()
                     warehouse_num = row[0]  # jumps to except if does not exist
                     # Create the book_warehouse if it doesn't exist:
-                    sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
-                    cur.execute(sqlQuery, (self.numeralFld.value, str(warehouse_num),) )
+                    sqlQuery = "SELECT * FROM 'optidrome.book_warehouse' WHERE book_num=? AND warehouse_num=?"
+                    cur.execute(sqlQuery, (self.numberFld.value, str(warehouse_num),) )
                     row = cur.fetchone()
                     if row == None:   # book_warehouse does not exist, create it
-                        sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
-                        values = (int(self.numeralFld.value), int(warehouse_num), None, None)
+                        sqlQuery = "INSERT INTO 'optidrome.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
+                        values = (int(self.numberFld.value), int(warehouse_num), None, None)
                         cur.execute(sqlQuery, values)
                         conn.commit()
                 except TypeError:   # warehouse does not exist, we don't create it at this point.
@@ -957,12 +958,12 @@ class BookForm(npyscreen.FormBaseNew):
                     if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
                         bs.notify_OK("\n  Nothing was deleted.", "Message")
                         return
-                    sqlQuery = "SELECT numeral FROM 'bookstore.warehouse' WHERE code=?"
+                    sqlQuery = "SELECT numeral FROM 'optidrome.warehouse' WHERE code=?"
                     cur.execute(sqlQuery, (wh,) )
                     row = cur.fetchone()                                        
-                    book_num = self.numeralFld.value
+                    book_num = self.numberFld.value
                     warehouse_num = str(row[0])
-                    cur.execute("DELETE FROM 'bookstore.book_warehouse' WHERE book_num="+book_num+" AND warehouse_num="+warehouse_num)
+                    cur.execute("DELETE FROM 'optidrome.book_warehouse' WHERE book_num="+book_num+" AND warehouse_num="+warehouse_num)
                     conn.commit()
 
         # Update the Book record
@@ -971,7 +972,7 @@ class BookForm(npyscreen.FormBaseNew):
         price = float(Decimal(price))
         columns = "numeral=?, book_title=?, original_title=?, description=?, isbn=?, year=?, publisher_num=?, creation_date=?, genre_id=?, cover_type=?, price=?"
         sqlQuery = "UPDATE " + DBTABLENAME + " SET " + columns + " WHERE id=?"
-        values = (int(self.numeralFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, self.isbnFld.value, \
+        values = (int(self.numberFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, self.isbnFld.value, \
             int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price, config.fileRow[0])
         cur.execute(sqlQuery, values)
         conn.commit()
@@ -988,9 +989,9 @@ class BookForm(npyscreen.FormBaseNew):
         else:
             if self.exist_changes():
                 self.save_updated_book()
-                self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
             else:
-                self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
                 self.exitBook(modified=False)
 
     def updateCancelbtn_function(self):
@@ -1001,7 +1002,7 @@ class BookForm(npyscreen.FormBaseNew):
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
                 self.exitBook(modified=False)
         else:
-            self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+            self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
             self.exitBook(modified=False)
 
     def screenToDBDate(self, screenDate, screenFormat):
@@ -1162,7 +1163,7 @@ class BookForm(npyscreen.FormBaseNew):
         "Hooked from bs.MyPopup.__init__()"
         parentField = None
         if widget.name == "Author:" :
-            parentField = self.authorFld
+            parentField = self.patientFld
         elif widget.name == "Publisher:" :
             parentField = self.publisherFld
         elif widget.name == "Warehouses:" :

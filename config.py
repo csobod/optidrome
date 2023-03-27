@@ -5,6 +5,7 @@
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
+#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
@@ -32,7 +33,7 @@ elif system == "Linux":
     dataPath = os.getcwd() + "/Data/"
     textViewer = "mousepad" # for Manjaro Xfce
 
-pname = "bookstore"     # program name
+pname = "Optidrome"     # program name
 dbname = pname + ".db"
 
 # Program version: from git cmd or previously created json file
@@ -68,8 +69,8 @@ fileRow = None          # Current record-row, includes id; same structure as fil
 currentRow = 0          # Currently selected record-row Numeral field
 screenRow = None        # Selected row number/index in the grid
 
-dateFormat = "dd/mm/yy"             # currently accepted format (accepted formats below)
-dateTimeFormat = "dd-mm-yy hh:MM"   # currently accepted format
+dateFormat = "mm/dd/yy"             # currently accepted format (accepted formats below)
+dateTimeFormat = "mm-dd-yy hh:MM"   # currently accepted format
 timeFormat = "hh:MM:ss"             # currently accepted format
 
 dateAcceptedFormats = ["dd-mm-yy", "dd/mm/yy", "dd-mm-yyyy", "dd/mm/yyyy", 
@@ -83,7 +84,7 @@ last_operation = None
 
 decimal_symbol = "."    # can be "." or ","
 ndecimals = 2   # price mantissa
-currency_symbol = "€"
+currency_symbol = "$"
 genreList = ["Narrative","Theatre","Poetry","Short story","Essay"]
 coverTypeList = ["Softcover with one-sided board",\
             "Silk softcover",\

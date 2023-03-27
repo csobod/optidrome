@@ -558,11 +558,11 @@ class BookSelectForm(npyscreen.FormBaseNew):
                 bs.notify_OK("Find: Error in date literal", "Message")
                 return False
 
-        fieldStr = "'bookstore.book'.id, 'bookstore.book'.numeral, 'bookstore.book'.book_title, 'bookstore.author'.name, \
+        fieldStr = "'bookstore.book'.id, 'bookstore.book'.numeral, 'bookstore.book'.book_title, 'optidrome.patient'.name, \
             'bookstore.book'.year, 'bookstore.publisher'.name, 'bookstore.book'.creation_date, 'bookstore.book'.isbn"
         sqlQuery = "SELECT " + fieldStr + " FROM " + DBTABLENAME + \
             " INNER JOIN 'bookstore.book_author' ON 'bookstore.book_author'.book_num = 'bookstore.book'.numeral " + \
-            " INNER JOIN 'bookstore.author' ON 'bookstore.author'.numeral = 'bookstore.book_author'.author_num " + \
+            " INNER JOIN 'optidrome.patient' ON 'optidrome.patient'.numeral = 'bookstore.book_author'.author_num " + \
             " INNER JOIN 'bookstore.publisher' ON 'bookstore.publisher'.numeral = 'bookstore.book'.publisher_num "
             
         if field == "numeral":
@@ -570,7 +570,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
         elif field == "title":
             field = "book_title"
         elif field == "author":
-            field = "'bookstore.author'.name"
+            field = "'optidrome.patient'.name"
         elif field == "publisher":
             field = "'bookstore.publisher'.name"
         elif field == "date":
@@ -588,7 +588,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
                 else:
                     whereStr = "WHERE 'bookstore.book'.numeral LIKE ?" \
                         " OR 'bookstore.book'.book_title LIKE ?" \
-                        " OR 'bookstore.author'.name LIKE ?" \
+                        " OR 'optidrome.patient'.name LIKE ?" \
                         " OR 'bookstore.book'.year LIKE ?" \
                         " OR 'bookstore.publisher'.name LIKE ?" \
                         " OR 'bookstore.book'.creation_date LIKE ?" \
@@ -681,7 +681,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
             is_main_author = row[3]
             if is_main_author:  # = is main author
                 author_num = row[2]
-                sqlQuery = "SELECT * FROM 'bookstore.author' WHERE numeral=?"
+                sqlQuery = "SELECT * FROM 'optidrome.patient' WHERE numeral=?"
                 try:
                     cur.execute( sqlQuery, (str(author_num),) )
                 except sqlite3.Error as e:

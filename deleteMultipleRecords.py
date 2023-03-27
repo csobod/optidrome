@@ -146,7 +146,7 @@ class DeleteMultipleRecordsForm(npyscreen.FormBaseNew):
         try:
             sqlQuery = "DELETE FROM 'bookstore.book'"
             cur.execute(sqlQuery)
-            sqlQuery = "DELETE FROM 'bookstore.author'"
+            sqlQuery = "DELETE FROM 'optidrome.patient'"
             cur.execute(sqlQuery)
             sqlQuery = "DELETE FROM 'bookstore.publisher'"
             cur.execute(sqlQuery)
@@ -179,7 +179,7 @@ class DeleteMultipleRecordsForm(npyscreen.FormBaseNew):
         if self.table == "book":
             tableTxt = "'bookstore.book'"
         elif self.table == "author":
-            tableTxt = "'bookstore.author'"
+            tableTxt = "'optidrome.patient'"
         elif self.table == "publisher":
             tableTxt = "'bookstore.publisher'"
         elif self.table == "warehouse":

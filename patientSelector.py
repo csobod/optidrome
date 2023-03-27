@@ -2,20 +2,21 @@
 # encoding: utf-8
 
 ##############################################################################
-#     authorSelector.py - Selector and options for author maintenance
+#     patientSelector.py - Selector and options for patient maintenance
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
+#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
 ##############################################################################
 # Form with following widgets:
 #   .editw = 0 --> screen title
-#   .editw = 1 --> book record grid
+#   .editw = 1 --> order record grid
 #   .editw = 2 --> status literal / options line at screen bottom
 #   .editw = 3 --> 1-letter option input field
-#   .editw = 4 --> Detail input field for 6-digit Numeral, and for search literal, initially hidden
+#   .editw = 4 --> Detail input field for 6-digit Number, and for search literal, initially hidden
 ##############################################################################
 
 import datetime
@@ -27,27 +28,24 @@ import numpy
 
 import bsWidgets as bs
 import config
-from author import AuthorForm
+from patient import PatientForm
 from config import SCREENWIDTH as WIDTH
 
 REMEMBER_ROW = True    # remember the last row selected when coming from main menu
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last found subset
 DATEFORMAT = config.dateFormat  # program-wide
-FIELD_LIST = ["numeral", "name", "address", "bio", "url"]     # only screen fields
-DBTABLENAME = "'bookstore.Author'"
+FIELD_LIST = ["number", "name", "dob", "address", "phone", "email"]     # only screen fields
+DBTABLENAME = "'optidrome.Patient'"   # table name in the database
 
-helpText =  "Another record selector screen for the authors.\n\n" \
-    "* Although in the database exists an intermediate table 'book/author', I have not really implemented " \
-    "that one book can have more than one author. So, in the book record -> author field, every single " \
-    "combination of several authors counts as a different author.\n\n" \
-    "* Please excuse my Pythonic sense of humor in the Address field. It has allowed me for some alphabetical " \
-    "experiments. The Chinese characters are left in the field on purpose, to see their effect on the screen " \
-    "layout on Windows. The Linux terminal works fine though.\n\n" \
-    "* Please also see the help on the Book Selector and Book record for more info on field types."
+helpText =  "Serves record selector screen for patients.\n\n"
+#    "* Although in the database exists an intermediate table 'book/patient', I have not really implemented " \
+#    "that one book can have more than one patient. So, in the book record -> patient field, every single " \
+#    "combination of several patients counts as a different patient.\n\n" \
 
 
-class AuthorSelectForm(npyscreen.FormBaseNew):
-    "Author selector and FCRUD options."
+
+class PatientSelectForm(npyscreen.FormBaseNew):
+    "Patient selector and FCRUD options."
     def __init__(self, name="", parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=True, *args, **keywords):
         # Creates the father, npyscreen.FormBaseNew.
@@ -59,22 +57,22 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
     def create(self):
         "The standard constructor will call the method .create(), which you should override to create the Form widgets."
         self.framed = False   # frameless form
-        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE]  = self.exitAuthorSelector   # Escape exit
+        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE]  = self.exitPatientSelector   # Escape exit
         
         # Form title - Screen title line
         pname, version = config.pname, config.program_version
-        self.form_title = pname + " " + version + " - Author selector"
+        self.form_title = pname + " " + version + " - Patient selector"
         self.today = self.get_today()
-        self.formTitle=self.add(bs.MyTextfield, name="AuthorTitle", value=None, relx=0, rely=0, \
+        self.formTitle=self.add(bs.MyTextfield, name="PatientTitle", value=None, relx=0, rely=0, \
             use_max_space=True, width=WIDTH, max_width=WIDTH, maximum_string_length=WIDTH, editable=False)
 
-        # Authors Grid
-        self.grid = bs.MyGrid(screen=self, name="AuthorGrid")      # (All attributes get filled later)
+        # Patients Grid
+        self.grid = bs.MyGrid(screen=self, name="PatientGrid")      # (All attributes get filled later)
         self.grid.editing=True
-        self.columnTitles = ["Numeral","     Name","   Address"," Bio","   URL"]
-        self.col_widths = [8, 28, 21, 12, 11]    # fields must add up to WIDTH
+        self.columnTitles = ["Number","     Name"," DOB","   Address"," Phone","   Email"]
+        self.col_widths = [8, 28, 12, 10, 11, 11]    # fields must add up to WIDTH
 
-        self.grid = self.add(self.grid.__class__, name="AuthorGrid", col_titles=self.columnTitles, col_widths=self.col_widths, \
+        self.grid = self.add(self.grid.__class__, name="PatientGrid", col_titles=self.columnTitles, col_widths=self.col_widths, \
                 relx=0, rely=1, height=22, width=WIDTH, min_height=22, min_width=WIDTH, editable=True, hidden=False, \
                 values=None, select_whole_line=True, always_show_cursor=True, column_width=14, use_max_space=True)
         
@@ -92,8 +90,8 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.value = ""
         self.inputOpt.check_value_change=True
 
-        # Detail input field for 3-digit numeral, and also for Find-literal
-        self.inputDetail = self.add(bs.DetailField, screenForm=AuthorForm, name='DetailFld', value="", relx=26, rely=24,
+        # Detail input field for 3-digit number, and also for Find-literal
+        self.inputDetail = self.add(bs.DetailField, screenForm=PatientForm, name='DetailFld', value="", relx=26, rely=24,
                                         width=5, height=0, max_width=5, max_height=0, 
                                         editable=True, hidden=True, use_max_space=True)
 
@@ -132,7 +130,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         cur = config.conn.cursor()
         while True:     # multiuser DB locking loop
             try:
-                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY numeral")
+                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY number")
                 break   # go on
             except sqlite3.OperationalError:
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
@@ -140,13 +138,14 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         rows = []        
         for row in filerows:
             id = row[0]
-            numeral = row[1]
+            number = row[1]
             name = row[2]
-            address = row[3]
-            bio = row[4]
-            url = row[5]
-            cRow = [id, numeral, name, address, bio, url]
-            rows.append(cRow)    # including Author.id
+            dob = row[3]
+            address = row[4]
+            phone = row[5]
+            email = row[6]
+            cRow = [id, number, name, dob, address, phone, email]
+            rows.append(cRow)    # including Patient.id
         self.set_up_title(filerows, full_set=True)
         return rows # it's a list of lists
 
@@ -157,7 +156,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         self.grid.values = self.screenFileRows
 
     def update_grid(self):
-        "Updates the affected row in the author grid and RAM config table list."
+        "Updates the affected row in the patient grid and RAM config table list."
         # After a change or creation, grid displays full set :
         if not REMEMBER_SUBSET or config.last_table != DBTABLENAME or \
                 (config.last_table == DBTABLENAME and config.last_operation == "Create") :
@@ -181,7 +180,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
     
     def create_row(self):
         "It's been keypressed C/c=Create."
-        # Lets display the empty author form:
+        # Lets display the empty patient form:
         self.inputDetail.option = "Create"
         self.inputOpt.value = "C"
         self.inputOpt.display()
@@ -194,13 +193,13 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         self.inputDetail.relx = 26  # just in case
         self.ask_option()  # for when we get back to this screen
 
-        config.parentApp.setNextForm("AUTHOR")
+        config.parentApp.setNextForm("PATIENT")
         config.parentApp.switchFormNow()
-        AuthorForm.set_createMode()
+        PatientForm.set_createMode()
 
     def read_row(self):
         "It's been keypressed R/r=Read."
-        # (Must ask to confirm the searched numeral)
+        # (Must ask to confirm the searched number)
         self.inputDetail.option = "Read"
         self.inputOpt.value = "R"
         self.inputOpt.display()
@@ -211,7 +210,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
         
         # Reset former status line field
-        self.statusLiteral = "Enter numeral to read:                                                         "
+        self.statusLiteral = "Enter number to read:                                                         "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -221,24 +220,24 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
 
         self.grid.editing = False
 
-        searchedNumeral = config.currentRow
+        searchedNumber = config.currentRow
         self.inputDetail.hidden = False
         self.inputDetail.editable = True
         self.inputDetail.relx = 26
         self.inputDetail.width = 5
         self.inputDetail.max_width = 5
         self.inputDetail.maximum_string_length = 3
-        self.inputDetail.value = str(searchedNumeral)
+        self.inputDetail.value = str(searchedNumber)
         self.inputDetail.check_value_change=True
         self.inputDetail.editing = True    # grid exit
         self.inputDetail.how_exited = True     # self.find_next_editable, to default value
-        self.editw = 4      # Change to numeral input field
+        self.editw = 4      # Change to number input field
 
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
 
     def update_row(self):
         "It's been keypressed U/u=Update."
-        # (Must ask to confirm the searched numeral)
+        # (Must ask to confirm the searched number)
         self.inputDetail.option = "Update"
         self.inputOpt.value = "U"
         self.inputOpt.display()
@@ -249,7 +248,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
         
         # Reset former status line field
-        self.statusLiteral = "Enter numeral to update:                                                         "
+        self.statusLiteral = "Enter number to update:                                                         "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -259,18 +258,18 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
 
         self.grid.editing = False
 
-        searchedNumeral = config.currentRow
+        searchedNumber = config.currentRow
         self.inputDetail.hidden = False
         self.inputDetail.editable = True
         self.inputDetail.relx = 26
         self.inputDetail.width = 5
         self.inputDetail.max_width = 5
         self.inputDetail.maximum_string_length = 3
-        self.inputDetail.value = str(searchedNumeral)
+        self.inputDetail.value = str(searchedNumber)
         self.inputDetail.check_value_change=True
         self.inputDetail.editing = True    # grid exit
         self.inputDetail.how_exited = True     # self.find_next_editable, to default value
-        self.editw = 4      # Change to numeral input field
+        self.editw = 4      # Change to number input field
         
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
     
@@ -314,7 +313,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
 
     def delete_row(self):
         "It's been keypressed D/d=Delete."
-        # (Must ask to confirm the searched numeral to delete)
+        # (Must ask to confirm the searched number to delete)
         self.inputDetail.option = "Delete"
         self.inputOpt.value = "D"
         self.inputOpt.display()
@@ -325,7 +324,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
 
         # Reset former status line field
-        self.statusLiteral = "Enter numeral to delete:                                                       "
+        self.statusLiteral = "Enter number to delete:                                                       "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -335,33 +334,33 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
 
         self.grid.editing = False
 
-        searchedNumeral = config.currentRow
+        searchedNumber = config.currentRow
         self.inputDetail.hidden = False
         self.inputDetail.editable = True
         self.inputDetail.relx = 26
         self.inputDetail.width = 5
         self.inputDetail.max_width = 5
         self.inputDetail.maximum_string_length = 3
-        self.inputDetail.value = str(searchedNumeral)
+        self.inputDetail.value = str(searchedNumber)
         self.inputDetail.check_value_change=True
         self.inputDetail.editing = True    # grid exit
         self.inputDetail.how_exited = True     # self.find_next_editable, to default value
-        self.editw = 4      # Change to numeral input field
+        self.editw = 4      # Change to number input field
         
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
 
-    def read_record(self, numeral):
+    def read_record(self, number):
         "Search for the required record and store it in a reachable variable. Called from the Detail-field widget."
         config.screenRow = 0
         config.fileRow = []
         for row in config.fileRows:
-            if row[1] == numeral:
+            if row[1] == number:
                 cur = config.conn.cursor()
                 while True:     # multiuser DB locking loop
                     try:
                         # I could just use .append(row[0]) below, but I read again to allow for record locking
-                        sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE numeral=?"
-                        cur.execute(sqlQuery, (str(numeral),) )
+                        sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE number=?"
+                        cur.execute(sqlQuery, (str(number),) )
                         break   # go on
                     except sqlite3.OperationalError:
                         bs.notify_OK("\n    Database is locked, please wait.", "Message")
@@ -382,10 +381,10 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
             config.screenRow += 1
         return False    # not found
 
-    def exitAuthorSelector(self):
-        "Escape key was pressed: isinstance(self, AuthorSelectForm) = True; we always come from the OptionField."
+    def exitPatientSelector(self):
+        "Escape key was pressed: isinstance(self, PatientSelectForm) = True; we always come from the OptionField."
         get_out = False
-        if self.statusLine.value != self.optionsLiteral:    # it's not the options statusline; it's the numeral field
+        if self.statusLine.value != self.optionsLiteral:    # it's not the options statusline; it's the number field
             # we come from DetailField : we must restore the options statusline and get back to the OptionField
             self.hide_detail()
             self.ask_option()
@@ -464,12 +463,12 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE "
         if not comparator:
             if field == False:  # no field specified, so search all fields
-                whereStr = "numeral LIKE ? OR name LIKE ? OR address LIKE ?" +\
-                    " OR bio LIKE ? OR url LIKE ? COLLATE NOCASE ORDER BY numeral"
+                whereStr = "number LIKE ? OR name LIKE ? OR address LIKE ?" +\
+                    " OR dob LIKE ? OR phone LIKE ? OR email LIKE ? COLLATE NOCASE ORDER BY number"
             else:
-                whereStr = field + " LIKE ? COLLATE NOCASE ORDER BY numeral"
+                whereStr = field + " LIKE ? COLLATE NOCASE ORDER BY number"
         elif comparator:
-            whereStr = field + " " + comparator + " ? COLLATE NOCASE ORDER BY numeral"
+            whereStr = field + " " + comparator + " ? COLLATE NOCASE ORDER BY number"
 
         sqlQuery += whereStr
 
@@ -495,7 +494,7 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
         rows = []        
         for row in filerows:
             cRow = [row[0], row[1], row[2], row[3], row[4], row[5]]
-            rows.append(cRow)    # including Author.id
+            rows.append(cRow)    # including Patient.id
         config.fileRows = rows
         self.screenFileRows = self.getRowListForScreen(config.fileRows)     # it's a list of lists
         self.grid.values = self.screenFileRows
@@ -504,5 +503,5 @@ class AuthorSelectForm(npyscreen.FormBaseNew):
 
     def textfield_exit(self):
         "Exit from Detail field with Escape"
-        self.exitAuthorSelector()
+        self.exitPatientSelector()
         #pass    # do nothing = don't exit

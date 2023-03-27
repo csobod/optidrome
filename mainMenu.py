@@ -5,6 +5,7 @@
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
+#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
@@ -21,8 +22,8 @@ import linecache
 import npyscreen
 from npyscreen import util_viewhelp
 
-import author
-import authorSelector
+import patient
+import patientSelector
 import book
 import bookListing
 import bookSelector
@@ -60,8 +61,8 @@ class bookstoreApp(npyscreen.NPSAppManaged):
 
         # check tables' existence:
         cur = config.conn.cursor()
-        DBprefix = "bookstore."
-        table_list = [  "author",
+        DBprefix = "optidrome."
+        table_list = [  "patient",
                         "book",
                         "book_author",
                         "publisher",
@@ -95,10 +96,10 @@ class bookstoreApp(npyscreen.NPSAppManaged):
             help=bookSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("BOOK", book.BookForm(name="BookForm", parentApp=self, \
             help=book.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-        self.registerForm("AUTHORSELECTOR", authorSelector.AuthorSelectForm(name="AuthorSelector", parentApp=self, \
-            help=authorSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-        self.registerForm("AUTHOR", author.AuthorForm(name="AuthorForm", parentApp=self, \
-            help=author.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("PATIENTSELECTOR", patientSelector.PatientSelectForm(name="PatientSelector", parentApp=self, \
+            help=patientSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("PATIENT", patient.PatientForm(name="PatientForm", parentApp=self, \
+            help=patient.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("PUBLISHERSELECTOR", publisherSelector.PublisherSelectForm(name="PublisherSelector", parentApp=self, \
             help=publisherSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("PUBLISHER", publisher.PublisherForm(name="PublisherForm", parentApp=self, \
@@ -218,11 +219,11 @@ class MainMenuForm(npyscreen.FormBaseNew):
 
     def mainSelector(self):
         value_list = [
-           "1. Book edition",
-           "2. Author edition",
-           "3. Publisher edition",
-           "4. Warehouse edition",
-           "5. Book listing",
+           "1. Open Orders",
+           "2. Patient Database",
+           "3. Create New Order",
+           "4. Lab Database",
+           "5. Closed Orders",
            "6. Utilities",
            "Q. Quit program" ]
 

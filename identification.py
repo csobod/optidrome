@@ -5,6 +5,7 @@
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
+#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
@@ -20,7 +21,7 @@ from npyscreen import wgwidget as widget
 import bsWidgets as bs
 import config
 
-DBTABLENAME = "'bookstore.User'"
+DBTABLENAME = "'optidrome.User'"
 DATETIMEFORMAT = config.dateTimeFormat
 global form
 

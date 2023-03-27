@@ -1,6 +1,10 @@
-# The *bookstore* Project
+# The *optidrome* Project
 
-*"bookstore" is a multi-screen database maintenance program developed on npyscreen, a character terminal user interface.*
+*"optidrome" is a multi-screen database maintenance program developed on npyscreen, a character terminal user interface.*
+
+Due to the lack of terminal-based EMR programs, specifically ones designed for dispensing opticians, I decided I should try and produce something to fill this void. Originally designed for my own personal use, this will continue to always be free here on GitHub, for anyone in the future who wants to use it or contribute to it. I am an amateur coder, so I have based this work very heavily upon the *bookstore* program by David Villena and forked that program. Aside from objective additions to come, such as database encryption/backup, POS, card processor, DVI/fax bridge for laboratory transmission, and email blast promotion, the majority of the code in this project is written by David Villena. This program wouldn't exist without his program *bookstore*.
+
+<!---
 
 This is my attempt at building a fully npyscreen-based application, while learning a decent amount of Python at the same time. It's kind of a demo of the solutions I've implemented using Nicholas P. S. Cole's excellent 'npyscreen' Terminal User Interface library. My focus has been on the final user interaction and usability. Although the program is a fully-fledged book manager on a SQL database, it's more like a demo. Please feel free to share your criticism (and knowledge), I'm using this project as a workbench to learn the right pythonic approach to this implementation.
 
@@ -46,3 +50,5 @@ To run the *bookstore*, simply:
 <p align="center">
   <img src="https://github.com/dvdvillena/bookstore/blob/master/Docs/Images/Screens-06.jpg">
 </p>
+
+-->
