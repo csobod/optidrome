@@ -41,7 +41,7 @@ class DBintegrityCheckForm(npyscreen.FormBaseNew):
     def __init__(self, name="DBIntegrityCheck", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
     widget_list=None, cycle_widgets=False, ok_button_function=None, cancel_button_function=None, *args, **keywords):
 
-        """ Crea el padre, npyscreen.FormBaseNew. """
+        """ Create the parent, npyscreen.FormBaseNew. """
         super().__init__(name, parentApp, framed, help, color, widget_list, cycle_widgets=cycle_widgets, *args, **keywords)
 
     def create(self):

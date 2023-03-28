@@ -40,6 +40,9 @@ import warehouse
 import warehouseSelector
 import dbIntegrityCheck
 import deleteMultipleRecords
+import dbManager
+import backupDb
+
 from config import SCREENWIDTH as WIDTH
 
 AUTHENTICATE = config.AUTHENTICATE
@@ -120,6 +123,8 @@ class bookstoreApp(npyscreen.NPSAppManaged):
             help=dbIntegrityCheck.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("DELETE_MULTIPLE_RECORDS", deleteMultipleRecords.DeleteMultipleRecordsForm(name="DeleteMultipleRecordsForm", parentApp=self, \
             help=deleteMultipleRecords.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("DBMANAGER", dbManager.DbManagerForm(name="DBManagerForm", parentApp=self, \
+            help=dbManager.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 
     def onInMainLoop(self):
         """Called between each screen while the application is running. Not called before the first screen. Override at will"""
@@ -171,7 +176,7 @@ class MainMenuForm(npyscreen.FormBaseNew):
 
     def __init__(self, name=None, parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=False, *args, **keywords):
-        """ Crea el padre, npyscreen._FormBase """
+        """ Create the parent, npyscreen._FormBase """
         super().__init__(name, parentApp, framed, help, color, widget_list, cycle_widgets, *args, **keywords)   # goes to _FormBase.__init__()
         
         self.password_entered = False

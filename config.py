@@ -27,7 +27,6 @@ system = platform.system()
 system_release = platform.release()     # e.g. '10', '8.1', '5.15.76-1-MANJARO'  
 if system == "Windows":
     dataPath = os.getcwd().replace("\\", "/") + "/Data/"    # or a remote resource like "J:/Data/"
-    #dataPath = "J:/PyProjects/bookstore/Data/"
     textViewer = "notepad"
 elif system == "Linux":
     dataPath = os.getcwd() + "/Data/"
