@@ -15,6 +15,7 @@ import sqlite3
 import os
 print(os.getcwd())
 
+# Creates tables user, patient, rxorder, frame, and lens.
 
 conn = sqlite3.connect('eyeglass_store.db')
 c = conn.cursor()

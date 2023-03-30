@@ -62,17 +62,15 @@ class bookstoreApp(npyscreen.NPSAppManaged):
         
         self.connect_database()
 
-        # check tables' existence:
+        # check tables exist for user, patient, rxorder, frame, lens, and lab.
         cur = config.conn.cursor()
-        DBprefix = "optidrome."
-        table_list = [  "patient",
-                        "book",
-                        "book_author",
-                        "publisher",
-                        "user",
-                        "warehouse",
-                        "book_warehouse"
-                        ]
+        DBprefix = "optidrome."  # why the fuck is this a thing? considering nuking it.
+        table_list = [  "user",
+                        "patient",
+                        "rxorder",
+                        "frame",
+                        "lens",
+                        "lab"   ]
 
         while True: # locking the SQLite single user DB
             for tname in table_list:
