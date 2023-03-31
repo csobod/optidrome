@@ -64,7 +64,7 @@ class bookstoreApp(npyscreen.NPSAppManaged):
 
         # check tables exist for user, patient, rxorder, frame, lens, and lab.
         cur = config.conn.cursor()
-        DBprefix = "optidrome."  # why the fuck is this a thing? considering nuking it.
+        DBprefix = "optidrome."
         table_list = [  "user",
                         "patient",
                         "rxorder",
@@ -149,6 +149,7 @@ class bookstoreApp(npyscreen.NPSAppManaged):
             form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
 
     def connect_database(self):
+        ## EVENTUALLY ENCRYPTION LOCKING WILL GO HERE, I THINK
         "Check and connect database."
         # SQLite DB file exists:
         DBpath = config.dataPath

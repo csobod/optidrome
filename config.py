@@ -32,7 +32,7 @@ elif system == "Linux":
     dataPath = os.getcwd() + "/Data/"
     textViewer = "mousepad" # for Manjaro Xfce
 
-pname = "Optidrome"     # program name
+pname = "optidrome"     # program name
 dbname = pname + ".db"
 
 # Program version: from git cmd or previously created json file
@@ -84,12 +84,19 @@ last_operation = None
 decimal_symbol = "."    # can be "." or ","
 ndecimals = 2   # price mantissa
 currency_symbol = "$"
-genreList = ["Narrative","Theatre","Poetry","Short story","Essay"]
-coverTypeList = ["Softcover with one-sided board",\
-            "Silk softcover",\
-            "Printed paper case hardcover",\
-            "Cloth hardcover",\
-            "Hardcover with dust jacket"]
+
+lensStyleList = ["SV", "BF", "PAL"]
+
+lensAugmentList = ["Polar", "Photo", "450 Block"]
+
+lensCoatList = ["AR", "BAR", "MIR"]
+
+# genreList = ["Narrative","Theatre","Poetry","Short story","Essay"]
+#coverTypeList = ["Softcover with one-sided board",\
+#            "Silk softcover",\
+#            "Printed paper case hardcover",\
+#            "Cloth hardcover",\
+#            "Hardcover with dust jacket"]
 
 REMEMBER_SUBSET = True  # remember the last found subset
 REMEMBER_FILTERS = False  # remember the last listing filter subset
