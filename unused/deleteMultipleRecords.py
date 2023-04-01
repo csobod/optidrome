@@ -243,15 +243,15 @@ class DeleteMultipleRecordsForm(npyscreen.FormBaseNew):
 
         config.last_operation = "DeleteMultipleRecords"
         if self.deleteSwitches.value[0] == 0:   # Empty the database
-            self.parentApp._Forms['BOOKSELECTOR'].update_grid()
-            self.parentApp._Forms['AUTHORSELECTOR'].update_grid()
+            self.parentApp._Forms['RXORDERSELECTOR'].update_grid()
+            self.parentApp._Forms['PATIENTSELECTOR'].update_grid()
             self.parentApp._Forms['PUBLISHERSELECTOR'].update_grid()
             self.parentApp._Forms['WAREHOUSESELECTOR'].update_grid()
         else:
             if self.table == "book":
-                self.parentApp._Forms['BOOKSELECTOR'].update_grid()
+                self.parentApp._Forms['RXORDERSELECTOR'].update_grid()
             elif self.table == "author":
-                self.parentApp._Forms['AUTHORSELECTOR'].update_grid()
+                self.parentApp._Forms['PATIENTSELECTOR'].update_grid()
             elif self.table == "publisher":
                 self.parentApp._Forms['PUBLISHERSELECTOR'].update_grid()
             elif self.table == "warehouse":

@@ -48,7 +48,7 @@ def set_profiling():
 if __name__ == "__main__":
     if config.system == "Linux":
         os.environ.setdefault('ESCDELAY', '25')     # To shorten Esc key delay
-    App = mainMenu.bookstoreApp()
+    App = mainMenu.optidromeApp()
     if PROFILING:
         set_profiling()
     else:

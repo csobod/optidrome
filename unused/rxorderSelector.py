@@ -29,14 +29,14 @@ import numpy
 
 import bsWidgets as bs
 import config
-from book import BookForm
+from rxorder import RxOrderForm
 from config import SCREENWIDTH as WIDTH
 
 REMEMBER_ROW = True    # remember the last row selected when coming from main menu
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last 'Find' result subset
 DATEFORMAT = config.dateFormat  # program-wide
-FIELD_LIST = ["numeral","title","author","year","publisher","date","isbn"]  # only screen fields, not DB
-DBTABLENAME = "'bookstore.book'"
+FIELD_LIST = ["order_id","patient_id","","year","publisher","date","isbn"]  # only screen fields, not DB
+DBTABLENAME = "'rxorder'"
 
 helpText =  "The book selector is a grid of database table rows (records).\n\n" +\
     "* Use the arrow keys, Page Up/Down and Home/End to navigate the grid.\n\n" +\
@@ -55,7 +55,7 @@ helpText =  "The book selector is a grid of database table rows (records).\n\n" 
     "By default, the record grid 'remembers' the result of the last search. This behaviour can be changed by variable. "    
 
 
-class BookSelectForm(npyscreen.FormBaseNew):
+class RxOrderSelectForm(npyscreen.FormBaseNew):
     "Book selector and FCRUD options."
     def __init__(self, name="", parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=True, *args, **keywords):
@@ -70,7 +70,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
     def create(self):
         "The standard constructor will call the method .create(), which you should override to create the Form widgets."
         self.framed = False   # frameless form
-        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exitBookSelector   # Escape exit
+        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exitRxOrderSelector   # Escape exit
         
         # Form title - Screen title line
         pname, version = config.pname, config.program_version
@@ -104,7 +104,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.check_value_change=True
 
         # Detail input field for 6-digit numeral, and also for Find-literal
-        self.inputDetail = self.add(bs.DetailField, screenForm=BookForm, name='DetailFld', value="", relx=26, rely=24,
+        self.inputDetail = self.add(bs.DetailField, screenForm=RxOrderForm, name='DetailFld', value="", relx=26, rely=24,
                                         width=8, height=0, max_width=8, max_height=0, 
                                         editable=True, hidden=True, use_max_space=True)
         
@@ -217,9 +217,9 @@ class BookSelectForm(npyscreen.FormBaseNew):
         self.grid.editing = False
         self.inputDetail.relx = 26 # just in case
         self.ask_option()  # for when we are back to this screen
-        config.parentApp.setNextForm("BOOK")
+        config.parentApp.setNextForm("RXORDER")
         config.parentApp.switchFormNow()
-        BookForm.set_createMode()
+        RxOrderForm.set_createMode()
 
     def read_row(self):
         "It's been keypressed R/r=Read."
@@ -421,8 +421,8 @@ class BookSelectForm(npyscreen.FormBaseNew):
         time.sleep(0.6)     # let it be seen
         return False    # not found
 
-    def exitBookSelector(self):
-        "Escape key was pressed: isinstance(self, BookSelectForm) = True; we always come from the OptionField."
+    def exitRxOrderSelector(self):
+        "Escape key was pressed: isinstance(self, RxOrderSelectForm) = True; we always come from the OptionField."
         get_out = False
         if self.statusLine.value != self.optionsLiteral:    # it's not the option statusline; it's the detail field
             # we come from DetailField : we have to restore the option statusline and come back to the OptionField
@@ -713,5 +713,5 @@ class BookSelectForm(npyscreen.FormBaseNew):
 
     def textfield_exit(self):
         "Exit from Detail field with Escape"
-        self.exitBookSelector()
+        self.exitRxOrderSelector()
         #pass    # do nothing = don't exit

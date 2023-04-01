@@ -333,7 +333,7 @@ class MyTextfield(textbox.TextfieldBase):
         string_to_print = self._get_string_to_print()
 
         if not string_to_print:
-            if self.parent.name == "BookSelector" or \
+            if self.parent.name == "RxOrderSelector" or \
                 self.parent.name == "AuthorSelector" or \
                 self.parent.name == "PublisherSelector" or \
                 self.parent.name == "WarehouseSelector" or \
@@ -498,7 +498,7 @@ class MyTextfield(textbox.TextfieldBase):
         self.editing = False
         self.how_exited = EXITED_UP
         try:
-            self.parent.widget_was_exited()  # for bookListing.py
+            self.parent.widget_was_exited()  # for rxorderListing.py
         except AttributeError:
             pass
 
@@ -509,7 +509,7 @@ class MyTextfield(textbox.TextfieldBase):
         self.editing = False
         self.how_exited = widget.EXITED_DOWN
         try:
-            self.parent.widget_was_exited()  # for bookListing.py
+            self.parent.widget_was_exited()  # for rxorderListing.py
         except AttributeError:
             pass
    
@@ -801,7 +801,7 @@ class MyGridColTitles(grid.SimpleGrid):
             column_indexer = self.begin_col_display_at
             for cell in widget_row:
                 cell.grid_current_value_index = (row_indexer, column_indexer)
-                if self.parent.name == "BookSelector" and self.form.right_screen:
+                if self.parent.name == "RxOrderSelector" and self.form.right_screen:
                     if column_indexer != 5 and column_indexer != 6:
                         continue    # in the 2nd screen, disallow to keep displaying columns over the only two valid
                 self._print_cell(cell, )
@@ -914,7 +914,7 @@ class MyGrid(MyGridColTitles):
             self.form.right_screen = True    # meaning the screen on the right hand
 
             # Hacking grid right-screen column sizes
-            if self.parent.name == "BookSelector":
+            if self.parent.name == "RxOrderSelector":
                 for row in range(len(self._my_widgets)):
                     self._my_widgets[row][0].maximum_string_length = self.col_widths[-2]
                     self._my_widgets[row][1].maximum_string_length = self.col_widths[-1]
@@ -985,7 +985,7 @@ class MyGrid(MyGridColTitles):
         
         _title_counter = 0
         for title_cell in self._my_col_titles:
-            if self.parent.name == "BookSelector":
+            if self.parent.name == "RxOrderSelector":
                 if self.form.right_screen:
                     if title_cell.value.strip() in ["Date","ISBN/SKU"]:
                         pass    # to the try
@@ -1253,10 +1253,10 @@ class DetailField(MyTextfield):
         self.form.hide_detail()
         self.form.ask_option()
 
-        if "BookForm" in repr(self.formScreen):
-            nextForm = "BOOK"
+        if "RxOrderForm" in repr(self.formScreen):
+            nextForm = "RXORDER"
         elif "AuthorForm" in repr(self.formScreen):
-            nextForm = "AUTHOR"
+            nextForm = "PATIENT"
         elif "PublisherForm" in repr(self.formScreen):
             nextForm = "PUBLISHER"
         elif "WarehouseForm" in repr(self.formScreen):
@@ -1718,7 +1718,7 @@ class MyAutocomplete(textbox.Textfield):
         editable_field = False
 
         try:
-            editable_field = self.parent.is_editable_field(widget=self)  # for book.py and bookListing.py
+            editable_field = self.parent.is_editable_field(widget=self)  # for book.py and rxorderListing.py
         except AttributeError:
             pass
 
@@ -2033,7 +2033,7 @@ class MyAutocomplete(textbox.Textfield):
             tmp_window = MyPopupWide(self.parent, name=self.name, framed=True, show_atx=0, show_aty=0, columns=WIDTH, lines=15, shortcut_len=4)
         elif self.popupType == "narrow":
             try:
-                tmp_window = self.parent.create_popup_window(widget=self)    # Hook for book.py and bookListing.py
+                tmp_window = self.parent.create_popup_window(widget=self)    # Hook for book.py and rxorderListing.py
             except AttributeError:
                 pass
 
@@ -2117,7 +2117,7 @@ class MyAutocomplete(textbox.Textfield):
                 #self.parent.push_a_tab()    Beware the back-tab!
         elif self.chooserType == "complex":
             try:
-                self.value = self.parent.scan_value_in_list(widget=self)    # Hook for book.py and bookListing.py
+                self.value = self.parent.scan_value_in_list(widget=self)    # Hook for book.py and rxorderListing.py
                 self.current_value = self.value
             except AttributeError:
                 if len(self.value) > self.maximum_string_length:
@@ -2231,7 +2231,7 @@ class MyPopup(fmForm.Form):
         
         self.parentField = None
         try:
-            self.parentField = screen.get_parentField(widget=self)     # for book.py and bookListing.py
+            self.parentField = screen.get_parentField(widget=self)     # for book.py and rxorderListing.py
         except AttributeError:
             pass
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # encoding: utf-8
 ##############################################################################
-#     bookListing.py - Book reporting
+#     rxorderListing.py - Book reporting
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
@@ -47,7 +47,7 @@ If config.SAVE_REPORTS=False, automatically deletes the reports after created in
 != %ab% %cde% != %fg%  -> (book_title NOT LIKE '%ab% %cde%') AND (book_title NOT LIKE '%fg%')	-> Beware the lacking '!='\n\n"
 
 
-class BookListingForm(npyscreen.FormBaseNew):
+class RxOrderListingForm(npyscreen.FormBaseNew):
     "Form for the book listing."
     def __init__(self, name="BookListing", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
     widget_list=None, cycle_widgets=False, ok_button_function=None, cancel_button_function=None, *args, **keywords):

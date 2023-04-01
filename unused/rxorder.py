@@ -25,7 +25,7 @@ import bsWidgets as bs
 import config
 
 DATEFORMAT = config.dateFormat
-DBTABLENAME = "'optidrome.book'"
+DBTABLENAME = "'rxorder'"
 
 global form
 
@@ -48,7 +48,7 @@ helpText =  "The book form is a typical record selector form.\n\n" +\
     "* 'Price' is a money field, designed to accept digits and point/comma."
 
 
-class BookForm(npyscreen.FormBaseNew):
+class RxOrderForm(npyscreen.FormBaseNew):
     "Book record on screen for maintenance."
     def __init__(self, name="Book", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
         widget_list=None, cycle_widgets=False, ok_button_function=None, cancel_button_function=None, *args, **keywords):
@@ -59,7 +59,7 @@ class BookForm(npyscreen.FormBaseNew):
         global form
         form = self
 
-        self.selectorForm = self.parentApp._Forms['BOOKSELECTOR']
+        self.selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
 
     def create(self):
         "The standard constructor will call the method .create(), which you should override to create the Form widgets."
@@ -158,7 +158,7 @@ class BookForm(npyscreen.FormBaseNew):
         "Returns a list of authors from DB"
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT name FROM 'optidrome.Patient' ORDER BY name")
+        cur.execute("SELECT name FROM 'patient' ORDER BY name")
         filerows = cur.fetchall()
         author_list = []
         for row in filerows:
@@ -297,7 +297,7 @@ class BookForm(npyscreen.FormBaseNew):
         config.conn.close()
         self.parentApp.connect_database()
 
-        config.parentApp.setNextForm("BOOKSELECTOR")
+        config.parentApp.setNextForm("RXORDERSELECTOR")
         config.parentApp.switchFormNow()
 
     def get_last_numeral(self, table_name):

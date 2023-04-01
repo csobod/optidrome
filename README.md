@@ -4,7 +4,7 @@
 
 Due to the lack of terminal-based EMR programs, specifically ones designed for dispensing opticians, I decided I should try and produce something to fill this void. Originally designed for my own personal use, this will continue to always be free here on GitHub, for anyone in the future who wants to use it or contribute to it. I am an amateur coder, so I have based this work very heavily upon the *bookstore* program by David Villena and forked that program. Aside from objective additions to come, such as database encryption/backup, POS, card processor, DVI/fax bridge for laboratory transmission, and email blast promotion, the majority of the code in this project is written by David Villena. This program wouldn't exist without his program *bookstore*.
 
-To Do:
+## To Do:
  - Everything lol; but seriously, just getting everything working properly in bare-bones fashion is first priority.
  - Inventory management and automatic pricing tabulation for orders.
  - POS card reader integration and payment processing.

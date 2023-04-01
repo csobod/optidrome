@@ -19,14 +19,29 @@ import time
 import tracemalloc
 import linecache
 
-import identification
-
 import npyscreen
 from npyscreen import util_viewhelp
 
+#import patient
+#import patientSelector
+#import rxorder
+#import rxorderListing
+#import rxorderSelector
 import bsWidgets as bs
 
 import config
+import identification
+#import publisher
+#import publisherSelector
+import user
+import userSelector
+#import utilities
+#import warehouse
+#import warehouseSelector
+#import dbIntegrityCheck
+#import deleteMultipleRecords
+#import dbManager
+#import backupDb
 
 from config import SCREENWIDTH as WIDTH
 
@@ -76,6 +91,36 @@ class optidromeApp(npyscreen.NPSAppManaged):
             lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH, maximum_columns=WIDTH))
         self.registerForm("IDENTIFICATION", identification.ID_Form(name="Identification", parentApp=self, \
             help=identification.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("RXORDERSELECTOR", rxorderSelector.RxOrderSelectForm(name="RxOrderSelector", parentApp=self, \
+#            help=rxorderSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("RXORDER", rxorder.RxOrderForm(name="RxOrderForm", parentApp=self, \
+#            help=rxorder.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("PATIENTSELECTOR", patientSelector.PatientSelectForm(name="PatientSelector", parentApp=self, \
+#            help=patientSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("PATIENT", patient.PatientForm(name="PatientForm", parentApp=self, \
+#            help=patient.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("PUBLISHERSELECTOR", publisherSelector.PublisherSelectForm(name="PublisherSelector", parentApp=self, \
+#            help=publisherSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("PUBLISHER", publisher.PublisherForm(name="PublisherForm", parentApp=self, \
+#            help=publisher.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("WAREHOUSESELECTOR", warehouseSelector.WarehouseSelectForm(name="WarehouseSelector", parentApp=self, \
+#            help=warehouseSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("WAREHOUSE", warehouse.WarehouseForm(name="WarehouseForm", parentApp=self, \
+#            help=warehouse.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("RXORDERLISTING", rxorderListing.RxOrderListingForm(name="RxOrderListingForm", parentApp=self, \
+#            help=rxorderListing.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("UTILITIES", utilities.UtilitiesMenuForm(name="UtilitiesForm", parentApp=self, \
+#            help=utilities.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("USERSELECTOR", userSelector.UserSelectForm(name="UserSelector", parentApp=self, \
+#            help=userSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("USER", user.UserForm(name="UserForm", parentApp=self, \
+#            help=user.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("DB_INTEGRITY_CHECK", dbIntegrityCheck.DBintegrityCheckForm(name="DBintegrityCheckForm", parentApp=self, \
+#            help=dbIntegrityCheck.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("DELETE_MULTIPLE_RECORDS", deleteMultipleRecords.DeleteMultipleRecordsForm(name="DeleteMultipleRecordsForm", parentApp=self, \
+#            help=deleteMultipleRecords.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("DBMANAGER", dbManager.DbManagerForm(name="DBManagerForm", parentApp=self, \
+#            help=dbManager.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 
     def onInMainLoop(self):
         """Called between each screen while the application is running. Not called before the first screen. Override at will"""
@@ -160,8 +205,6 @@ class MainMenuForm(npyscreen.FormBaseNew):
         self.add_handlers({"4": self.keyHandler})  # menu 4
         self.add_handlers({"5": self.keyHandler})  # menu 5
         self.add_handlers({"6": self.keyHandler})  # menu 6
-        self.add_handlers({"7": self.keyHandler})  # menu 7
-        self.add_handlers({"8": self.keyHandler})  # menu 8
         self.add_handlers({"q": self.keyHandler})  # exit with "q"
         self.add_handlers({"Q": self.keyHandler})  # exit with "Q"
    
@@ -179,13 +222,11 @@ class MainMenuForm(npyscreen.FormBaseNew):
     def mainSelector(self):
         value_list = [
            "1. Open Orders",
-           "2. Patient Archive",
+           "2. Patient Database",
            "3. Create New Order",
-           "4. Order Archive",
-           "5. Lab Directory",
-           "6. Frame Inventory",
-           "7. Lens Database",
-           "8. Database Tools",
+           "4. Lab Database",
+           "5. Closed Orders",
+           "6. Utilities",
            "Q. Quit program" ]
 
         self.selector = self.add(VerticalMenu,
@@ -213,53 +254,70 @@ class MainMenuForm(npyscreen.FormBaseNew):
                 self.selector.cursor_line=1
                 self.display()
                 time.sleep(0.2)
-                self.menuPatientSelector()
+                self.menuAuthorSelector()
             case 51:    # menu 3
                 self.selector.cursor_line=2
                 self.display()
                 time.sleep(0.2)
-                self.menuRxOrder()
+                self.menuPublisherSelector()
             case 52:    # menu 4
                 self.selector.cursor_line=3
                 self.display()
                 time.sleep(0.2)
-                self.menuRxOrderListing()
+                self.menuWarehouseSelector()
             case 53:    # menu 5
                 self.selector.cursor_line=4
                 self.display()
                 time.sleep(0.2)
-                self.menuLabSelector()
+                self.menuBookListing()
             case 54:    # menu 6
                 self.selector.cursor_line=5
                 self.display()
                 time.sleep(0.2)
-                self.menuInventorySelector()
-            case 55:    # menu 7
-                self.selector.cursor_line=6
-                self.display()
-                time.sleep(0.2)
-                self.menuLensSelector()
-            case 56:    # menu 8
-                self.selector.cursor_line=7
-                self.display()
-                time.sleep(0.2)
-                self.menuDatabaseTools()
+                self.menuUtilities()
             case ( 81 | 113 ):    # menu Q/q
                 self.selector.cursor_line=9
                 self.display()
                 time.sleep(0.2)
                 self.exitApplication()
 
-#    def menuRxOrderSelector(self):
-#        # Calls books selector
-#        selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
-#        selectorForm.update_grid()  # must be read here to get config.fileRows right
-#        selectorForm.ask_option()
-#        self.app.switchForm("RXORDERSELECTOR")
-#
-#    def menuUtilities(self):
-#        # Call utilities menu.
-#        self.app.switchForm("UTILITIES")
+    def menuRxOrderSelector(self):
+        # Calls books selector
+        selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("RXORDERSELECTOR")
+        
+    def menuAuthorSelector(self):
+        # Calls authors selector
+        selectorForm = self.parentApp._Forms['PATIENTSELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("PATIENTSELECTOR")
+        
+    def menuPublisherSelector(self):
+        # Calls publishers selector
+        selectorForm = self.parentApp._Forms['PUBLISHERSELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("PUBLISHERSELECTOR")
+        
+    def menuWarehouseSelector(self):
+        # Calls warehouse selector
+        selectorForm = self.parentApp._Forms['WAREHOUSESELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("WAREHOUSESELECTOR")
+
+    def menuBookListing(self):
+        # Calls book listing 
+        form = self.parentApp._Forms['RXORDERLISTING']
+        form.initialize()
+        self.app.switchForm("RXORDERLISTING")
+        
+    def menuUtilities(self):
+        # Call utilities menu.
+        self.app.switchForm("UTILITIES")
 
     def updateMenu(self):
         self.display(clear=True)    # repaints, coming from F1_Help
@@ -334,17 +392,17 @@ class VerticalMenu(bs.MyMultiLineAction):
     def actionHighlighted(self, act_on_this, keypress):
         "Select by arrows + Enter key."
         form = self.parent
-#        if act_on_this[0] == "1":   # Book selector
-#            form.menuRxOrderSelector()
-#        elif act_on_this[0] == "2": # Author selector
-#            form.menuAuthorSelector()
-#        elif act_on_this[0] == "3": # Publisher selector
-#            form.menuPublisherSelector()
-#        elif act_on_this[0] == "4": # Warehouse selector
-#            form.menuWarehouseSelector()
-#        elif act_on_this[0] == "5": # Book listing
-#            form.menuBookListing()
-#        elif act_on_this[0] == "6": # Utilities
-#            form.menuUtilities()
-#        elif act_on_this[0] == "Q": # Quit program
-#            form.exitApplication()
+        if act_on_this[0] == "1":   # Book selector
+            form.menuRxOrderSelector()
+        elif act_on_this[0] == "2": # Author selector
+            form.menuAuthorSelector()
+        elif act_on_this[0] == "3": # Publisher selector
+            form.menuPublisherSelector()
+        elif act_on_this[0] == "4": # Warehouse selector
+            form.menuWarehouseSelector()
+        elif act_on_this[0] == "5": # Book listing
+            form.menuBookListing()
+        elif act_on_this[0] == "6": # Utilities
+            form.menuUtilities()
+        elif act_on_this[0] == "Q": # Quit program
+            form.exitApplication()

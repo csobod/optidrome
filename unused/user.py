@@ -22,7 +22,7 @@ import bsWidgets as bs
 import config
 
 DATEFORMAT = config.dateFormat
-DBTABLENAME = "'bookstore.User'"
+DBTABLENAME = "'optidrome.user'"
 
 global form
 
