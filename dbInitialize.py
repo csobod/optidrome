@@ -99,12 +99,13 @@ def main():
     sql_create_frame_table = """
         CREATE TABLE IF NOT EXISTS frame (
         frame_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        frame_brand TEXT NOT NULL,
+        frame_make TEXT NOT NULL,
         frame_model TEXT NOT NULL,
         frame_color TEXT NOT NULL,
         frame_material TEXT NOT NULL,
-        frame_shape TEXT NOT NULL,
-        frame_style TEXT NOT NULL
+        frame_style TEXT NOT NULL,
+        frame_cost REAL NOT NULL,
+        frame_price REAL NOT NULL
     ); """
 
     sql_create_lens_table = """
@@ -112,7 +113,9 @@ def main():
         lens_id INTEGER PRIMARY KEY AUTOINCREMENT,
         lens_type TEXT NOT NULL,
         lens_material TEXT NOT NULL,
-        lens_coating TEXT NOT NULL
+        lens_coating TEXT NOT NULL,
+        lens_cost REAL NOT NULL,
+        lens_price REAL NOT NULL
     ); """
 
     sql_create_lab_table = """
@@ -130,14 +133,26 @@ def main():
         order_id INTEGER PRIMARY KEY AUTOINCREMENT,
         patient_id INTEGER NOT NULL,
         frame_id INTEGER NOT NULL,
-        lens_type TEXT NOT NULL,
         lens_material TEXT NOT NULL,
-        lens_coating TEXT,
+        lens_style TEXT NOT NULL,
+        lens_augment TEXT NOT NULL,
+        lens_coat TEXT NOT NULL,
         pd REAL NOT NULL,
         origin_lab TEXT NOT NULL,
         invoice_number TEXT NOT NULL,
         order_date TEXT NOT NULL,
         order_status TEXT NOT NULL,
+        order_type TEXT NOT NULL,
+        order_payment TEXT NOT NULL,
+        order_paymentstatus TEXT NOT NULL,
+        order_paymentdate TEXT NOT NULL,
+        order_paymentamount REAL NOT NULL,
+        order_paymentmethod TEXT NOT NULL,
+        order_paymentnotes TEXT,
+        order_shipdate TEXT NOT NULL,
+        order_shipmethod TEXT NOT NULL,
+        order_shiptracking TEXT NOT NULL,
+        order_shipnotes TEXT,
         order_notes TEXT,
         FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
         FOREIGN KEY (frame_id) REFERENCES frame(frame_id),

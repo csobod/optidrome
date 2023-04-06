@@ -85,11 +85,20 @@ decimal_symbol = "."    # can be "." or ","
 ndecimals = 2   # price mantissa
 currency_symbol = "$"
 
-lensStyleList = ["SV", "BF", "PAL"]
+lensMaterialList = ["Glass", "CR39", "Trivex", "1.60", "1.67", "1.74"]
+lensStyleList = ["SV", "BF", "PAL", "NVF"]
+lensAugmentList = ["Clear", "Tint", "Polar", "Photo", "450 Block"]
+lensCoatList = ["HC", "AR", "BAR", "MIR"]
 
-lensAugmentList = ["Polar", "Photo", "450 Block"]
+frameMakeList = ["Blinders", "Popular", "Loud", "Dusted", "Bespoke", "POF"]
+frameMaterialList = ["Combination", "Titanium", "Wood", "Acetate"]
+frameStyleList = ["Full Rim", "Half Rim", "Rimless", "Semi Rimless"]
 
-lensCoatList = ["AR", "BAR", "MIR"]
+orderStatusList = ["Pending", "Ordered", "Ready", "Dispensed", "Shipped", "Canceled"]
+orderTypeList = ["Retail", "Insurance", "Wholesale", "Plano"]
+orderPaymentList = ["Cash", "Credit Card", "Check", "Insurance", "Other"]
+orderPaymentStatusList = ["Paid", "Unpaid", "Refunded", "Other"]
+
 
 # genreList = ["Narrative","Theatre","Poetry","Short story","Essay"]
 #coverTypeList = ["Softcover with one-sided board",\

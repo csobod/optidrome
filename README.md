@@ -8,8 +8,9 @@ Due to the lack of terminal-based EMR programs, specifically ones designed for d
  - Everything lol; but seriously, just getting everything working properly in bare-bones fashion is first priority.
  - Inventory management and automatic pricing tabulation for orders.
  - POS card reader integration and payment processing.
- - DVI integration, if possible, and if not, lab order to fax/email automatically upon order submission.
+ - DVI integration, if possible, and if not, lab order to fax/email automatically upon order submission (possibly using hylafax).
  - National Optronics 4T tracer integration to read OMA and store as BLOB within order (with SVG conversion on demand using eeng/lens_protocol from Git)
+ - Topcon lensometer integration using the conversion library at Trojanekkk/TOPCON-CL-300-Converter
 
 <!---
 
