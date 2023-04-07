@@ -454,7 +454,12 @@ class PatientForm(npyscreen.FormBaseNew):
             cur.execute(sqlQuery, values)
             conn.commit()
 
-        sqlQuery = "UPDATE " + DBTABLENAME + " SET number=?, name=?, dob=?, address=?, phone=?, email=? WHERE id=?"
+##
+##      EDIT DOWN BELOW:
+##
+##
+
+        sqlQuery = "UPDATE " + DBTABLENAME + " SET patient_id=?, name=?, dob=?, address=?, phone=?, email=? WHERE id=?"
         values = (self.idFld.value, self.nameFld.value, self.addressFld.value, self.phoneFld.value, self.emailFld.value, config.fileRow[0])
         try:
             cur.execute(sqlQuery, values)
