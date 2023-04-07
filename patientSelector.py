@@ -115,6 +115,8 @@ class PatientSelectForm(npyscreen.FormBaseNew):
             today = today[:6] + today[8:]
         return today
 
+# EDIT HERE:####################################################################
+
     def getRowListForScreen(self, filerows):
         "Memory row list to screen row list for grid."
         if len(filerows) > 0:
@@ -122,7 +124,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
             self.screenFileRows = self.screenFileRows[:, 1:]  # ...cut the first field ("id")
             return self.screenFileRows.tolist()          # and again to list
         else:
-            empty_list = [["","","","",""]]
+            empty_list = [["","","","","",""]]
             return empty_list
 
     def readDBTable(self):
