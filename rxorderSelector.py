@@ -38,7 +38,7 @@ DATEFORMAT = config.dateFormat  # program-wide
 FIELD_LIST = ["order_id","patient_id","","year","publisher","date","isbn"]  # only screen fields, not DB
 DBTABLENAME = "'rxorder'"
 
-helpText =  "The book selector is a grid of database table rows (records).\n\n" +\
+helpText =  "The order selector is a grid of database table rows (records).\n\n" +\
     "* Use the arrow keys, Page Up/Down and Home/End to navigate the grid.\n\n" +\
     "* Under the grid there's a bottom line with the operating F+CRUD options. " +\
     "You can switch between the record grid and the options line with TAB key.\n\n" +\

@@ -21,7 +21,7 @@ import bsWidgets as bs
 import config
 
 DATEFORMAT = config.dateFormat
-DBTABLENAME = "'optidrome.Patient'"
+DBTABLENAME = "'patient'"
 
 global form
 
@@ -60,10 +60,10 @@ class PatientForm(npyscreen.FormBaseNew):
 
         # Form fields
 
-        self.numberFld=self.add(bs.MyTitleText, name="ID:", value="", relx=9, rely=5, begin_entry_at=11, editable=False)
+        self.idFld=self.add(bs.MyTitleText, name="ID:", value="", relx=9, rely=5, begin_entry_at=11, editable=False)
         self.nameFld=self.add(bs.MyTitleText, name="Name:", value="", relx=9, rely=7, begin_entry_at=11, editable=False)
         self.dobFld=self.add(bs.MyTitleText, name="DOB:", value="", relx=9, rely=9, begin_entry_at=11, editable=False)
-        self.addressFld=self.add(bs.MyTitleText, name="Address:", value="", relx=11, rely=9, begin_entry_at=11, fixed_length=False, editable=False)
+        self.addressFld=self.add(bs.MyTitleText, name="Address:", value="", relx=9, rely=11, begin_entry_at=11, fixed_length=False, editable=False)
         self.phoneFld=self.add(bs.MyTitleText, name="Phone:", value="", relx=9, rely=13, begin_entry_at=11, fixed_length=False, editable=False)
         self.emailFld=self.add(bs.MyTitleText, name="Email:", value="", relx=9, rely=15, begin_entry_at=11, fixed_length=False, editable=False)
 
@@ -75,7 +75,7 @@ class PatientForm(npyscreen.FormBaseNew):
         self.statusLine=self.add(bs.MyFixedText, name="PatientStatus", value="", relx=2, rely=23, use_max_space=True, editable=False)
 
     def backup_fields(self):
-        self.bu_number = self.numberFld.value
+        self.bu_number = self.idFld.value
         self.bu_name = self.nameFld.value
         self.bu_address = self.addressFld.value
         self.bu_phone = self.phoneFld.value
@@ -89,7 +89,7 @@ class PatientForm(npyscreen.FormBaseNew):
                 if row[0] == id:
                     config.fileRow = []
                     config.fileRow.append(row[0])
-                    config.fileRow.append(int(self.numberFld.value))
+                    config.fileRow.append(int(self.idFld.value))
                     config.fileRow.append(self.nameFld.value)
                     config.fileRow.append(self.addressFld.value)
                     config.fileRow.append(self.phoneFld.value)
@@ -118,7 +118,7 @@ class PatientForm(npyscreen.FormBaseNew):
     def get_last_number(self):
         "Get the last number from the database."
         cur = config.conn.cursor()
-        sqlQuery = "SELECT Number FROM " + DBTABLENAME + " ORDER BY Number DESC LIMIT 1"
+        sqlQuery = "SELECT patient_id FROM " + DBTABLENAME + " ORDER BY patient_id DESC LIMIT 1"
         cur.execute(sqlQuery)
         try:
             number = cur.fetchone()[0]
@@ -140,9 +140,9 @@ class PatientForm(npyscreen.FormBaseNew):
             except sqlite3.OperationalError:
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
         form.current_option = "Create"
-        form.numberFld.editable = True
-        form.numberFld.maximum_string_length = 3
-        form.numberFld.value = str(form.get_last_number() + 1)
+        form.idFld.editable = True
+        form.idFld.maximum_string_length = 3
+        form.idFld.value = str(form.get_last_number() + 1)
         form.nameFld.editable = True
         form.nameFld.value = ""
         form.addressFld.editable = True
@@ -164,7 +164,7 @@ class PatientForm(npyscreen.FormBaseNew):
         global form
         form.current_option = "Read"
         form.convertDBtoFields()
-        form.numberFld.editable = False
+        form.idFld.editable = False
         form.nameFld.editable = False
         form.addressFld.editable = False
         form.phoneFld.editable = False
@@ -184,8 +184,8 @@ class PatientForm(npyscreen.FormBaseNew):
         conn.execute('BEGIN EXCLUSIVE TRANSACTION')     # exclusive access starts here. Nothing else can r/w the DB.
         form.current_option = "Update"
         form.convertDBtoFields()
-        form.numberFld.editable = True
-        form.numberFld.maximum_string_length = 3
+        form.idFld.editable = True
+        form.idFld.maximum_string_length = 3
         form.nameFld.editable = True
         form.addressFld.editable = True
         form.phoneFld.editable = True
@@ -206,7 +206,7 @@ class PatientForm(npyscreen.FormBaseNew):
         conn.execute('BEGIN EXCLUSIVE TRANSACTION')     # exclusive access starts here. Nothing else can r/w the DB.
         form.current_option = "Delete"
         form.convertDBtoFields()
-        form.numberFld.editable = False
+        form.idFld.editable = False
         form.nameFld.editable = False
         form.addressFld.editable = False
         form.phoneFld.editable = False
@@ -220,7 +220,7 @@ class PatientForm(npyscreen.FormBaseNew):
 
     def convertDBtoFields(self):
         "Convert DB fields into screen fields (strings)."
-        self.numberFld.value = str(config.fileRow[1])
+        self.idFld.value = str(config.fileRow[1])
         self.nameFld.value = config.fileRow[2]
         self.addressFld.value = config.fileRow[3]
         self.phoneFld.value = config.fileRow[4]
@@ -228,7 +228,7 @@ class PatientForm(npyscreen.FormBaseNew):
 
     def strip_fields(self):
         "Required trimming of leading and trailing spaces."
-        self.numberFld.value = self.numberFld.value.strip()
+        self.idFld.value = self.idFld.value.strip()
         self.nameFld.value = self.nameFld.value.strip()
         self.addressFld.value = self.addressFld.value.strip()
         self.phoneFld.value = self.phoneFld.value.strip()
@@ -238,7 +238,7 @@ class PatientForm(npyscreen.FormBaseNew):
         "Save new record (from Create) in global variable."
         config.fileRow = []
         config.fileRow.append(None)    # ID field is incremental, fulfilled later
-        config.fileRow.append(int(self.numberFld.value))
+        config.fileRow.append(int(self.idFld.value))
         config.fileRow.append(self.nameFld.value)
         config.fileRow.append(self.addressFld.value)
         config.fileRow.append(self.phoneFld.value)
@@ -255,7 +255,7 @@ class PatientForm(npyscreen.FormBaseNew):
             if self.exist_changes():
                 self.save_mem_record()  # backup record in config variable
                 self.save_created_patient()
-                self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.idFld.value))
             else:
                 self.exitPatient(modified=False)
 
@@ -271,12 +271,12 @@ class PatientForm(npyscreen.FormBaseNew):
    
     def readOnlyOKbtn_function(self):
         "OK button function under Read mode."
-        self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
+        self.selectorForm.grid.set_highlight_row(int(self.idFld.value))
         self.exitPatient(modified=False)
 
     def readOnlyCancelbtn_function(self):
         "Cancel button function under Read mode."
-        self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
+        self.selectorForm.grid.set_highlight_row(int(self.idFld.value))
         self.exitPatient(modified=False)
 
     def delete_patient(self):
@@ -314,7 +314,7 @@ class PatientForm(npyscreen.FormBaseNew):
         conn = config.conn
         cur = conn.cursor()
         num = config.fileRow[1]
-        sqlQuery = "SELECT id FROM 'optidrome.order_patient' WHERE patient_num = ?"
+        sqlQuery = "SELECT id FROM 'rxorder' WHERE patient_id = ?"
         cur.execute(sqlQuery, (str(num),) )
         try:
             id = cur.fetchone()[0]
@@ -362,9 +362,9 @@ class PatientForm(npyscreen.FormBaseNew):
 
         # Mandatory values check:
         emptyField = False
-        if self.numberFld.value == "":
+        if self.idFld.value == "":
             emptyField = True
-            self.editw = self.get_editw_number("Number:") - 1
+            self.editw = self.get_editw_number("ID:") - 1
         elif self.nameFld.value == "":  
             emptyField = True
             self.editw = self.get_editw_number("Name:") - 1
@@ -375,24 +375,24 @@ class PatientForm(npyscreen.FormBaseNew):
         
         # wrong value check: number field
         try:
-            a = int(self.numberFld.value)
+            a = int(self.idFld.value)
         except ValueError:
             self.editw = self.get_editw_number("Number:") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Number must be integer"
             return errorMsg
-        if len(self.numberFld.value) > self.numberFld.maximum_string_length:
+        if len(self.idFld.value) > self.idFld.maximum_string_length:
             self.editw = self.get_editw_number("Number:") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Number maximum length exceeded"
             return errorMsg
 
         # repeated value check: number and name fields
-        if self.numberFld.value != self.bu_number or self.nameFld.value != self.bu_name:
+        if self.idFld.value != self.bu_number or self.nameFld.value != self.bu_name:
             for row in config.fileRows:
                 self.ok_button.editing = False
                 # Already exists and it's not itself
-                if row[1] == int(self.numberFld.value) and self.numberFld.value != self.bu_number:
+                if row[1] == int(self.idFld.value) and self.idFld.value != self.bu_number:
                     self.editw = self.get_editw_number("Number:") - 1
                     errorMsg = "Error:  Number already exists"
                     return errorMsg
@@ -405,7 +405,7 @@ class PatientForm(npyscreen.FormBaseNew):
     def exist_changes(self):
         "Checking for changes to the fields."
         exist_changes = False
-        if self.numberFld.value != self.bu_number or self.nameFld.value != self.bu_name or \
+        if self.idFld.value != self.bu_number or self.nameFld.value != self.bu_name or \
             self.dobFld.value != self.bu_dob or self.addressFld.value != self.bu_address or \
             self.phoneFld.value != self.bu_phone or self.emailFld.value != self.bu_email:
             exist_changes = True
@@ -421,8 +421,8 @@ class PatientForm(npyscreen.FormBaseNew):
 
         conn = config.conn
         cur = conn.cursor()
-        sqlQuery = "INSERT INTO " + DBTABLENAME + " (number,name,dob,address,phone,email) VALUES (?,?,?,?,?,?)"
-        values = (self.numberFld.value, self.nameFld.value, self.dobFld.value, self.addressFld.value, self.phoneFld.value, self.emailFld.value)
+        sqlQuery = "INSERT INTO " + DBTABLENAME + " (patient_id,name,dob,address,phone,email) VALUES (?,?,?,?,?,?)"
+        values = (self.idFld.value, self.nameFld.value, self.dobFld.value, self.addressFld.value, self.phoneFld.value, self.emailFld.value)
         cur.execute(sqlQuery, values)
         conn.commit()
         conn.isolation_level = None     # free the multiuser lock
@@ -432,7 +432,7 @@ class PatientForm(npyscreen.FormBaseNew):
         # update config.fileRows:
         new_record = []
         new_record.append(config.fileRow[0])    # id
-        new_record.append(int(self.numberFld.value))
+        new_record.append(int(self.idFld.value))
         new_record.append(self.nameFld.value)
         new_record.append(self.dobFld.value)
         new_record.append(self.addressFld.value)
@@ -447,21 +447,21 @@ class PatientForm(npyscreen.FormBaseNew):
         conn = config.conn
         cur = config.conn.cursor()
 
-        # Change patient_num in order_patient records:
-        if self.numberFld.value != self.bu_number:
-            sqlQuery = "UPDATE 'optidrome.order_patient' SET patient_num=? WHERE patient_num=?"
-            values = (self.numberFld.value, self.bu_number)
+        # Change patient_id in order_patient records:
+        if self.idFld.value != self.bu_number:
+            sqlQuery = "UPDATE 'rxorder' SET patient_id=? WHERE patient_id=?"
+            values = (self.idFld.value, self.bu_number)
             cur.execute(sqlQuery, values)
             conn.commit()
 
         sqlQuery = "UPDATE " + DBTABLENAME + " SET number=?, name=?, dob=?, address=?, phone=?, email=? WHERE id=?"
-        values = (self.numberFld.value, self.nameFld.value, self.addressFld.value, self.phoneFld.value, self.emailFld.value, config.fileRow[0])
+        values = (self.idFld.value, self.nameFld.value, self.addressFld.value, self.phoneFld.value, self.emailFld.value, config.fileRow[0])
         try:
             cur.execute(sqlQuery, values)
             conn.commit()
             bs.notify("\n       Record saved", title="Message", form_color='STANDOUT', wrap=True, wide=False)
         except sqlite3.IntegrityError:
-            bs.notify_OK("\n     Number or name of patient already exists. ", "Message")
+            bs.notify_OK("\n     ID or name of patient already exists. ", "Message")
             return
 
         self.exitPatient(modified=True)
@@ -476,9 +476,9 @@ class PatientForm(npyscreen.FormBaseNew):
         else:
             if self.exist_changes():
                 self.save_updated_patient()
-                self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.idFld.value))
             else:
-                self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.idFld.value))
                 self.exitPatient(modified=False)
 
     def updateCancelbtn_function(self):
@@ -489,7 +489,7 @@ class PatientForm(npyscreen.FormBaseNew):
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
                 self.exitPatient(modified=False)
         else:
-            self.selectorForm.grid.set_highlight_row(int(self.numberFld.value))
+            self.selectorForm.grid.set_highlight_row(int(self.idFld.value))
             self.exitPatient(modified=False)
 
     def textfield_exit(self):

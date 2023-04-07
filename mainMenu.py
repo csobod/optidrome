@@ -20,6 +20,8 @@ import tracemalloc
 import linecache
 
 import identification
+import patient
+import patientSelector
 
 import npyscreen
 from npyscreen import util_viewhelp
@@ -76,6 +78,12 @@ class optidromeApp(npyscreen.NPSAppManaged):
             lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH, maximum_columns=WIDTH))
         self.registerForm("IDENTIFICATION", identification.ID_Form(name="Identification", parentApp=self, \
             help=identification.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("PATIENTSELECTOR", patientSelector.PatientSelectForm(name="PatientSelector", parentApp=self, \
+            help=patientSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("PATIENT", patient.PatientForm(name="PatientForm", parentApp=self, \
+            help=patient.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+
+
 
     def onInMainLoop(self):
         """Called between each screen while the application is running. Not called before the first screen. Override at will"""
@@ -250,6 +258,13 @@ class MainMenuForm(npyscreen.FormBaseNew):
                 time.sleep(0.2)
                 self.exitApplication()
 
+    def menuPatientSelector(self):
+        # Calls books selector
+        selectorForm = self.parentApp._Forms['PATIENTSELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("PATIENTSELECTOR")
+
 #    def menuRxOrderSelector(self):
 #        # Calls books selector
 #        selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
@@ -334,10 +349,10 @@ class VerticalMenu(bs.MyMultiLineAction):
     def actionHighlighted(self, act_on_this, keypress):
         "Select by arrows + Enter key."
         form = self.parent
-#        if act_on_this[0] == "1":   # Book selector
-#            form.menuRxOrderSelector()
-#        elif act_on_this[0] == "2": # Author selector
-#            form.menuAuthorSelector()
+        if act_on_this[0] == "1":   # Book selector
+            form.menuRxOrderSelector()
+        elif act_on_this[0] == "2": # Author selector
+            form.menuPatientSelector()
 #        elif act_on_this[0] == "3": # Publisher selector
 #            form.menuPublisherSelector()
 #        elif act_on_this[0] == "4": # Warehouse selector

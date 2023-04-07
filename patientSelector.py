@@ -34,8 +34,8 @@ from config import SCREENWIDTH as WIDTH
 REMEMBER_ROW = True    # remember the last row selected when coming from main menu
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last found subset
 DATEFORMAT = config.dateFormat  # program-wide
-FIELD_LIST = ["number", "name", "dob", "address", "phone", "email"]     # only screen fields
-DBTABLENAME = "'optidrome.Patient'"   # table name in the database
+FIELD_LIST = ["patient_id", "name", "dob", "phone", "email", "address"]     # only screen fields
+DBTABLENAME = "'patient'"   # table name in the database
 
 helpText =  "Serves record selector screen for patients.\n\n"
 #    "* Although in the database exists an intermediate table 'book/patient', I have not really implemented " \
@@ -69,7 +69,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         # Patients Grid
         self.grid = bs.MyGrid(screen=self, name="PatientGrid")      # (All attributes get filled later)
         self.grid.editing=True
-        self.columnTitles = ["Number","     Name"," DOB","   Address"," Phone","   Email"]
+        self.columnTitles = [" ID   ","     Name"," DOB","   Address"," Phone","   Email"]
         self.col_widths = [8, 28, 12, 10, 11, 11]    # fields must add up to WIDTH
 
         self.grid = self.add(self.grid.__class__, name="PatientGrid", col_titles=self.columnTitles, col_widths=self.col_widths, \
@@ -130,21 +130,20 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         cur = config.conn.cursor()
         while True:     # multiuser DB locking loop
             try:
-                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY number")
+                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY patient_id")
                 break   # go on
             except sqlite3.OperationalError:
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
         filerows = cur.fetchall()
         rows = []        
         for row in filerows:
-            id = row[0]
-            number = row[1]
-            name = row[2]
-            dob = row[3]
-            address = row[4]
-            phone = row[5]
-            email = row[6]
-            cRow = [id, number, name, dob, address, phone, email]
+            patient_id = row[0]
+            name = row[1]
+            dob = row[2]
+            phone = row[3]
+            email = row[4]
+            address = row[5]
+            cRow = [patient_id, name, dob, phone, email, address]
             rows.append(cRow)    # including Patient.id
         self.set_up_title(filerows, full_set=True)
         return rows # it's a list of lists
@@ -199,7 +198,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
 
     def read_row(self):
         "It's been keypressed R/r=Read."
-        # (Must ask to confirm the searched number)
+        # (Must ask to confirm the searched patient_id)
         self.inputDetail.option = "Read"
         self.inputOpt.value = "R"
         self.inputOpt.display()
@@ -210,7 +209,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
         
         # Reset former status line field
-        self.statusLiteral = "Enter number to read:                                                         "
+        self.statusLiteral = "Enter patient ID to read:                                                         "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -248,7 +247,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
         
         # Reset former status line field
-        self.statusLiteral = "Enter number to update:                                                         "
+        self.statusLiteral = "Enter patient ID to update:                                                         "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -324,7 +323,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
 
         # Reset former status line field
-        self.statusLiteral = "Enter number to delete:                                                       "
+        self.statusLiteral = "Enter patient ID to delete:                                                       "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -349,18 +348,18 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
 
-    def read_record(self, number):
+    def read_record(self, patient_id):
         "Search for the required record and store it in a reachable variable. Called from the Detail-field widget."
         config.screenRow = 0
         config.fileRow = []
         for row in config.fileRows:
-            if row[1] == number:
+            if row[1] == patient_id:
                 cur = config.conn.cursor()
                 while True:     # multiuser DB locking loop
                     try:
                         # I could just use .append(row[0]) below, but I read again to allow for record locking
-                        sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE number=?"
-                        cur.execute(sqlQuery, (str(number),) )
+                        sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE patient_id=?"
+                        cur.execute(sqlQuery, (str(patient_id),) )
                         break   # go on
                     except sqlite3.OperationalError:
                         bs.notify_OK("\n    Database is locked, please wait.", "Message")
@@ -463,12 +462,12 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE "
         if not comparator:
             if field == False:  # no field specified, so search all fields
-                whereStr = "number LIKE ? OR name LIKE ? OR address LIKE ?" +\
-                    " OR dob LIKE ? OR phone LIKE ? OR email LIKE ? COLLATE NOCASE ORDER BY number"
+                whereStr = "patient_id LIKE ? OR name LIKE ? OR dob LIKE ?" +\
+                    " OR phone LIKE ? OR email LIKE ? OR address LIKE ? COLLATE NOCASE ORDER BY patient_id"
             else:
-                whereStr = field + " LIKE ? COLLATE NOCASE ORDER BY number"
+                whereStr = field + " LIKE ? COLLATE NOCASE ORDER BY patient_id"
         elif comparator:
-            whereStr = field + " " + comparator + " ? COLLATE NOCASE ORDER BY number"
+            whereStr = field + " " + comparator + " ? COLLATE NOCASE ORDER BY patient_id"
 
         sqlQuery += whereStr
 

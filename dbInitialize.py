@@ -85,15 +85,11 @@ def main():
     sql_create_patient_table = """
         CREATE TABLE IF NOT EXISTS patient (
         patient_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
         dob TEXT NOT NULL,
-        phone TEXT NOT NULL CHECK (length(phone) = 12),
-        street_address TEXT NOT NULL,
-        city TEXT NOT NULL,
-        state TEXT NOT NULL,
-        zip TEXT NOT NULL CHECK (length(zip) = 10)
+        phone TEXT NOT NULL CHECK (length(phone) >= 10),
+        email TEXT NOT NULL UNIQUE,
+        address TEXT NOT NULL
     ); """
 
     sql_create_frame_table = """
