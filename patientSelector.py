@@ -121,7 +121,8 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         "Memory row list to screen row list for grid."
         if len(filerows) > 0:
             self.screenFileRows = numpy.array(filerows)  # I need numpy to...
-            self.screenFileRows = self.screenFileRows[:, 1:]  # ...cut the first field ("id")
+#            self.screenFileRows = self.screenFileRows[:, 1:]  # ...cut the first field ("id")
+            self.screenFileRows = self.screenFileRows[:1]  # lol idunno what this does
             return self.screenFileRows.tolist()          # and again to list
         else:
             empty_list = [["","","","","",""]]
