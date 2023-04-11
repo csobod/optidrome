@@ -5,7 +5,6 @@
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
-#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
@@ -19,17 +18,27 @@ import time
 import tracemalloc
 import linecache
 
-import identification
-import patient
-import patientSelector
-
 import npyscreen
 from npyscreen import util_viewhelp
 
+#import author
+#import authorSelector
+#import book
+#import bookListing
+#import bookSelector
 import bsWidgets as bs
 
 import config
-
+import identification
+#import publisher
+#import publisherSelector
+import user
+import userSelector
+#import utilities
+#import warehouse
+#import warehouseSelector
+#import dbIntegrityCheck
+#import deleteMultipleRecords
 from config import SCREENWIDTH as WIDTH
 
 AUTHENTICATE = config.AUTHENTICATE
@@ -39,7 +48,8 @@ helpText =  "\nA simple menu form.\n\n\n" +\
     "* There's a 'Main menu' title that is a plain npyscreen.FixedText widget.\n\n" +\
     "* Under the title, there's the main selector widget, an adapted npyscreen.MultiLineAction.\n\n" +\
     "* Options can be accessed through the arrow keys + Enter, or through the direct pressing of a number key.\n\n" +\
-    "* Menu '6.Utilities' leads to another submenu.\n\n"
+    "* Menu '6.Utilities' leads to another submenu.\n\n" +\
+    "* The main purpose of this program is to share my experience with the npyscreen terminal user interface and of course to learn some Python." 
 
 
 class optidromeApp(npyscreen.NPSAppManaged):
@@ -48,18 +58,20 @@ class optidromeApp(npyscreen.NPSAppManaged):
         
         self.connect_database()
 
-        # check tables exist for user, patient, rxorder, frame, lens, and lab.
+        # check tables' existence:
         cur = config.conn.cursor()
-        #DBprefix = "optidrome."
-        table_list = [  "user",
-                        "patient",
+        DBprefix = "optidrome."
+        table_list = [  "patient",
+                        "rxorder",
                         "frame",
                         "lens",
-                        "lab",
-                        "rxorder" ]
+                        "user",
+                        "vendor"
+                        ]
+
         while True: # locking the SQLite single user DB
             for tname in table_list:
-#                tname = DBprefix + tname
+                tname = DBprefix + tname
                 sqlQuery = "SELECT EXISTS ( SELECT name FROM sqlite_schema WHERE type='table' AND name=? )"
                 try:
                     cur.execute(sqlQuery, (tname,) )
@@ -67,7 +79,7 @@ class optidromeApp(npyscreen.NPSAppManaged):
                         bs.notify_OK("\n Database: Table does not exist: '" + tname + "'","Error")
                         sys.exit()                
                 except sqlite3.OperationalError:    # default timeout is 5 sec
-                    bs.notify_OK("\n    Database is locked, please wait.", "Optidrome")
+                    bs.notify_OK("\n    Database is locked, please wait.", "Bookstore")
                     continue    # to the loop
             break   # go on
 
@@ -78,39 +90,60 @@ class optidromeApp(npyscreen.NPSAppManaged):
             lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH, maximum_columns=WIDTH))
         self.registerForm("IDENTIFICATION", identification.ID_Form(name="Identification", parentApp=self, \
             help=identification.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-        self.registerForm("PATIENTSELECTOR", patientSelector.PatientSelectForm(name="PatientSelector", parentApp=self, \
-            help=patientSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-        self.registerForm("PATIENT", patient.PatientForm(name="PatientForm", parentApp=self, \
-            help=patient.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-
-
+#        self.registerForm("BOOKSELECTOR", bookSelector.BookSelectForm(name="BookSelector", parentApp=self, \
+#            help=bookSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("BOOK", book.BookForm(name="BookForm", parentApp=self, \
+#            help=book.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("AUTHORSELECTOR", authorSelector.AuthorSelectForm(name="AuthorSelector", parentApp=self, \
+#            help=authorSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("AUTHOR", author.AuthorForm(name="AuthorForm", parentApp=self, \
+#            help=author.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("PUBLISHERSELECTOR", publisherSelector.PublisherSelectForm(name="PublisherSelector", parentApp=self, \
+#            help=publisherSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("PUBLISHER", publisher.PublisherForm(name="PublisherForm", parentApp=self, \
+#            help=publisher.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("WAREHOUSESELECTOR", warehouseSelector.WarehouseSelectForm(name="WarehouseSelector", parentApp=self, \
+#            help=warehouseSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("WAREHOUSE", warehouse.WarehouseForm(name="WarehouseForm", parentApp=self, \
+#            help=warehouse.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("BOOKLISTING", bookListing.BookListingForm(name="BookListingForm", parentApp=self, \
+#            help=bookListing.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("UTILITIES", utilities.UtilitiesMenuForm(name="UtilitiesForm", parentApp=self, \
+#            help=utilities.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("USERSELECTOR", userSelector.UserSelectForm(name="UserSelector", parentApp=self, \
+            help=userSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("USER", user.UserForm(name="UserForm", parentApp=self, \
+            help=user.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("DB_INTEGRITY_CHECK", dbIntegrityCheck.DBintegrityCheckForm(name="DBintegrityCheckForm", parentApp=self, \
+#            help=dbIntegrityCheck.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+#        self.registerForm("DELETE_MULTIPLE_RECORDS", deleteMultipleRecords.DeleteMultipleRecordsForm(name="DeleteMultipleRecordsForm", parentApp=self, \
+#            help=deleteMultipleRecords.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 
     def onInMainLoop(self):
         """Called between each screen while the application is running. Not called before the first screen. Override at will"""
         if self.NEXT_ACTIVE_FORM == 'IDENTIFICATION':
             form = self._Forms["IDENTIFICATION"]
             form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-        elif self.NEXT_ACTIVE_FORM == 'RXORDERSELECTOR':
-            form = self._Forms["RXORDERSELECTOR"]
-            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-        elif self.NEXT_ACTIVE_FORM == 'PATIENTSELECTOR':
-            form = self._Forms["PATIENTSELECTOR"]
-            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-        elif self.NEXT_ACTIVE_FORM == 'PUBLISHERSELECTOR':
-            form = self._Forms["PUBLISHERSELECTOR"]
-            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-        elif self.NEXT_ACTIVE_FORM == 'WAREHOUSESELECTOR':
-            form = self._Forms["WAREHOUSESELECTOR"]
-            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-        elif self.NEXT_ACTIVE_FORM == 'RXORDERLISTING':
-            form = self._Forms["RXORDERLISTING"]
-            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+#        elif self.NEXT_ACTIVE_FORM == 'BOOKSELECTOR':
+#            form = self._Forms["BOOKSELECTOR"]
+#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+#        elif self.NEXT_ACTIVE_FORM == 'AUTHORSELECTOR':
+#            form = self._Forms["AUTHORSELECTOR"]
+#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+#        elif self.NEXT_ACTIVE_FORM == 'PUBLISHERSELECTOR':
+#            form = self._Forms["PUBLISHERSELECTOR"]
+#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+#        elif self.NEXT_ACTIVE_FORM == 'WAREHOUSESELECTOR':
+#            form = self._Forms["WAREHOUSESELECTOR"]
+#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+#        elif self.NEXT_ACTIVE_FORM == 'BOOKLISTING':
+#            form = self._Forms["BOOKLISTING"]
+#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
         elif self.NEXT_ACTIVE_FORM == 'USERSELECTOR':
             form = self._Forms["USERSELECTOR"]
             form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
 
     def connect_database(self):
-        ## EVENTUALLY ENCRYPTION LOCKING WILL GO HERE, I THINK
         "Check and connect database."
         # SQLite DB file exists:
         DBpath = config.dataPath
@@ -136,7 +169,7 @@ class MainMenuForm(npyscreen.FormBaseNew):
 
     def __init__(self, name=None, parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=False, *args, **keywords):
-        """ Create the parent, npyscreen._FormBase """
+        """ Crea el padre, npyscreen._FormBase """
         super().__init__(name, parentApp, framed, help, color, widget_list, cycle_widgets, *args, **keywords)   # goes to _FormBase.__init__()
         
         self.password_entered = False
@@ -168,8 +201,6 @@ class MainMenuForm(npyscreen.FormBaseNew):
         self.add_handlers({"4": self.keyHandler})  # menu 4
         self.add_handlers({"5": self.keyHandler})  # menu 5
         self.add_handlers({"6": self.keyHandler})  # menu 6
-        self.add_handlers({"7": self.keyHandler})  # menu 7
-        self.add_handlers({"8": self.keyHandler})  # menu 8
         self.add_handlers({"q": self.keyHandler})  # exit with "q"
         self.add_handlers({"Q": self.keyHandler})  # exit with "Q"
    
@@ -186,14 +217,12 @@ class MainMenuForm(npyscreen.FormBaseNew):
 
     def mainSelector(self):
         value_list = [
-           "1. Open Orders",
-           "2. Patient Archive",
-           "3. Create New Order",
-           "4. Order Archive",
-           "5. Lab Directory",
-           "6. Frame Inventory",
-           "7. Lens Database",
-           "8. Database Tools",
+           "1. Book edition",
+           "2. Author edition",
+           "3. Publisher edition",
+           "4. Warehouse edition",
+           "5. Book listing",
+           "6. Utilities",
            "Q. Quit program" ]
 
         self.selector = self.add(VerticalMenu,
@@ -216,65 +245,75 @@ class MainMenuForm(npyscreen.FormBaseNew):
                 self.selector.cursor_line=0
                 self.display()
                 time.sleep(0.2)
-                self.menuRxOrderSelector()
+                self.menuBookSelector()
             case 50:    # menu 2
                 self.selector.cursor_line=1
                 self.display()
                 time.sleep(0.2)
-                self.menuPatientSelector()
+                self.menuAuthorSelector()
             case 51:    # menu 3
                 self.selector.cursor_line=2
                 self.display()
                 time.sleep(0.2)
-                self.menuRxOrder()
+                self.menuPublisherSelector()
             case 52:    # menu 4
                 self.selector.cursor_line=3
                 self.display()
                 time.sleep(0.2)
-                self.menuRxOrderListing()
+                self.menuWarehouseSelector()
             case 53:    # menu 5
                 self.selector.cursor_line=4
                 self.display()
                 time.sleep(0.2)
-                self.menuLabSelector()
+                self.menuBookListing()
             case 54:    # menu 6
                 self.selector.cursor_line=5
                 self.display()
                 time.sleep(0.2)
-                self.menuInventorySelector()
-            case 55:    # menu 7
-                self.selector.cursor_line=6
-                self.display()
-                time.sleep(0.2)
-                self.menuLensSelector()
-            case 56:    # menu 8
-                self.selector.cursor_line=7
-                self.display()
-                time.sleep(0.2)
-                self.menuDatabaseTools()
+                self.menuUtilities()
             case ( 81 | 113 ):    # menu Q/q
                 self.selector.cursor_line=9
                 self.display()
                 time.sleep(0.2)
                 self.exitApplication()
 
-    def menuPatientSelector(self):
+    def menuBookSelector(self):
         # Calls books selector
-        selectorForm = self.parentApp._Forms['PATIENTSELECTOR']
+        selectorForm = self.parentApp._Forms['BOOKSELECTOR']
         selectorForm.update_grid()  # must be read here to get config.fileRows right
         selectorForm.ask_option()
-        self.app.switchForm("PATIENTSELECTOR")
+        self.app.switchForm("BOOKSELECTOR")
+        
+    def menuAuthorSelector(self):
+        # Calls authors selector
+        selectorForm = self.parentApp._Forms['AUTHORSELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("AUTHORSELECTOR")
+        
+    def menuPublisherSelector(self):
+        # Calls publishers selector
+        selectorForm = self.parentApp._Forms['PUBLISHERSELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("PUBLISHERSELECTOR")
+        
+    def menuWarehouseSelector(self):
+        # Calls warehouse selector
+        selectorForm = self.parentApp._Forms['WAREHOUSESELECTOR']
+        selectorForm.update_grid()  # must be read here to get config.fileRows right
+        selectorForm.ask_option()
+        self.app.switchForm("WAREHOUSESELECTOR")
 
-#    def menuRxOrderSelector(self):
-#        # Calls books selector
-#        selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
-#        selectorForm.update_grid()  # must be read here to get config.fileRows right
-#        selectorForm.ask_option()
-#        self.app.switchForm("RXORDERSELECTOR")
-#
-#    def menuUtilities(self):
-#        # Call utilities menu.
-#        self.app.switchForm("UTILITIES")
+    def menuBookListing(self):
+        # Calls book listing 
+        form = self.parentApp._Forms['BOOKLISTING']
+        form.initialize()
+        self.app.switchForm("BOOKLISTING")
+        
+    def menuUtilities(self):
+        # Call utilities menu.
+        self.app.switchForm("UTILITIES")
 
     def updateMenu(self):
         self.display(clear=True)    # repaints, coming from F1_Help
@@ -350,16 +389,16 @@ class VerticalMenu(bs.MyMultiLineAction):
         "Select by arrows + Enter key."
         form = self.parent
         if act_on_this[0] == "1":   # Book selector
-            form.menuRxOrderSelector()
+            form.menuBookSelector()
         elif act_on_this[0] == "2": # Author selector
-            form.menuPatientSelector()
-#        elif act_on_this[0] == "3": # Publisher selector
-#            form.menuPublisherSelector()
-#        elif act_on_this[0] == "4": # Warehouse selector
-#            form.menuWarehouseSelector()
-#        elif act_on_this[0] == "5": # Book listing
-#            form.menuBookListing()
-#        elif act_on_this[0] == "6": # Utilities
-#            form.menuUtilities()
-#        elif act_on_this[0] == "Q": # Quit program
-#            form.exitApplication()
+            form.menuAuthorSelector()
+        elif act_on_this[0] == "3": # Publisher selector
+            form.menuPublisherSelector()
+        elif act_on_this[0] == "4": # Warehouse selector
+            form.menuWarehouseSelector()
+        elif act_on_this[0] == "5": # Book listing
+            form.menuBookListing()
+        elif act_on_this[0] == "6": # Utilities
+            form.menuUtilities()
+        elif act_on_this[0] == "Q": # Quit program
+            form.exitApplication()

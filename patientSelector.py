@@ -356,7 +356,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         config.screenRow = 0
         config.fileRow = []
         for row in config.fileRows:
-            if row[1] == patient_id:
+            if row[0] == patient_id:  # changed from 1
                 cur = config.conn.cursor()
                 while True:     # multiuser DB locking loop
                     try:

@@ -334,7 +334,7 @@ class MyTextfield(textbox.TextfieldBase):
 
         if not string_to_print:
             if self.parent.name == "RxOrderSelector" or \
-                self.parent.name == "AuthorSelector" or \
+                self.parent.name == "PatientSelector" or \
                 self.parent.name == "PublisherSelector" or \
                 self.parent.name == "WarehouseSelector" or \
                 self.parent.name == "UserSelector" :
@@ -1235,11 +1235,11 @@ class DetailField(MyTextfield):
         elif ch == curses.ascii.ESC:
             self.editing = False
     
-    def goto_Form(self, numeral):
+    def goto_Form(self, patient_id):
         "Search for the required record and store it in a globally-accessible variable."
         try:
             selectorForm = self.form
-            if not selectorForm.read_record(int(numeral)):
+            if not selectorForm.read_record(int(patient_id)):
                 notify("\n        Record not found", form_color='STANDOUT', wrap=True, wide=False)
                 time.sleep(0.6)     # let it be seen
                 return
@@ -1255,7 +1255,7 @@ class DetailField(MyTextfield):
 
         if "RxOrderForm" in repr(self.formScreen):
             nextForm = "RXORDER"
-        elif "AuthorForm" in repr(self.formScreen):
+        elif "PatientForm" in repr(self.formScreen):
             nextForm = "PATIENT"
         elif "PublisherForm" in repr(self.formScreen):
             nextForm = "PUBLISHER"

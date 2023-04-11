@@ -218,13 +218,13 @@ class PatientForm(npyscreen.FormBaseNew):
         form.editw = form.get_editw_number("Delete")
         config.last_operation = "Delete"
 
-    def convertDBtoFields(self):
+    def convertDBtoFields(self):  # Order is important
         "Convert DB fields into screen fields (strings)."
-        self.idFld.value = str(config.fileRow[1])
-        self.nameFld.value = config.fileRow[2]
-        self.addressFld.value = config.fileRow[3]
-        self.phoneFld.value = config.fileRow[4]
-        self.emailFld.value = config.fileRow[5]
+        self.idFld.value = str(config.fileRow[0])
+        self.nameFld.value = config.fileRow[1]
+        self.addressFld.value = config.fileRow[2]
+        self.phoneFld.value = config.fileRow[3]
+        self.emailFld.value = config.fileRow[4]
 
     def strip_fields(self):
         "Required trimming of leading and trailing spaces."

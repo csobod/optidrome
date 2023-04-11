@@ -33,7 +33,7 @@ REMEMBER_ROW = True    # remember the last row selected when coming from main me
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last found subset
 DATEFORMAT = config.dateFormat  # program-wide
 FIELD_LIST = ["numeral", "user", "name", "level", "date", "password"] # only screen fields
-DBTABLENAME = "'bookstore.User'"
+DBTABLENAME = "'optidrome.user'"
 
 helpText =  "The final user selector.\n\n" +\
     "* This grid has no specified column widths, they are set by default. And there's an extra column to the right " \

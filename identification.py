@@ -20,12 +20,11 @@ from npyscreen import wgwidget as widget
 import bsWidgets as bs
 import config
 
-DBTABLENAME = "'user'"
+DBTABLENAME = "'optidrome.user'"
 DATETIMEFORMAT = config.dateTimeFormat
 global form
 
-helpText = "The default username is 'admin' with password '1234'.\nThis should be changed upon first new use of the database.\n\n" +\
-    "A simple identification initial form. Can be deactivated by a variable.\n\n" +\
+helpText = "Enter user 'david' and password '1234' to go on.\n\nA simple identification initial form. Can be deactivated by a variable.\n\n" +\
     "* As in all the next forms, you can move along the different input fields using the TAB or Enter keys. " +\
     "But keep in mind that the Enter key activates/runs a button like 'OK' when it is reached.\n\n" +\
     "* So the right way to jump between the fields is TAB to move forward, and shift-TAB to move backwards. " +\
@@ -111,18 +110,18 @@ class ID_Form(npyscreen.FormBaseNew):
             return
 
         cur = config.conn.cursor()
-        sqlQuery = "SELECT username, password FROM " + DBTABLENAME + " WHERE username = ?"
+        sqlQuery = "SELECT user, user_level, password FROM " + DBTABLENAME + " WHERE user = ?"
         cur.execute(sqlQuery, (self.userFld.value,) )
         user_row = cur.fetchone()
         if user_row is None:
             bs.notify_OK("\n  User does not exist ", "Error")
             self.editw = 0
             self.ok_button.editing = False
-        else:
+        else:   # User was found
             "Cheap encryption of the password"
             dataBytes = base64.b64encode(self.passwordFld.value.encode('utf-8'))
             dataBytes = repr(dataBytes)[2:-1]
-            if dataBytes != user_row[1]:
+            if dataBytes != user_row[2]:
                 bs.notify_OK("\n  Wrong password ", "Error")
                 self.passwordFld.value = ""
                 self.editw = 1
