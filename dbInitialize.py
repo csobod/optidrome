@@ -96,6 +96,7 @@ def main():
         "phone" TEXT NOT NULL CHECK (length(phone) >= 10),
         "email" TEXT NOT NULL UNIQUE,
         "address"   TEXT NOT NULL,
+        "notes" TEXT,
         PRIMARY KEY("id")
     ); """
 
