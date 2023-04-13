@@ -2,21 +2,20 @@
 # encoding: utf-8
 
 ##############################################################################
-#     patientSelector.py - Selector and options for patient maintenance
+#     authorSelector.py - Selector and options for author maintenance
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
-#               2023, 2024 Chad Sobodash
 # All rights reserved.
 # Licensed under the New BSD License
 # (http://www.freebsd.org/copyright/freebsd-license.html)
 ##############################################################################
 # Form with following widgets:
 #   .editw = 0 --> screen title
-#   .editw = 1 --> order record grid
+#   .editw = 1 --> book record grid
 #   .editw = 2 --> status literal / options line at screen bottom
 #   .editw = 3 --> 1-letter option input field
-#   .editw = 4 --> Detail input field for 6-digit Number, and for search literal, initially hidden
+#   .editw = 4 --> Detail input field for 6-digit Numeral, and for search literal, initially hidden
 ##############################################################################
 
 import datetime
@@ -34,18 +33,21 @@ from config import SCREENWIDTH as WIDTH
 REMEMBER_ROW = True    # remember the last row selected when coming from main menu
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last found subset
 DATEFORMAT = config.dateFormat  # program-wide
-FIELD_LIST = ["patient_id", "name", "dob", "phone", "email", "address"]     # only screen fields
-DBTABLENAME = "'patient'"   # table name in the database
+FIELD_LIST = ["mrn", "name", "dob", "phone", "email"]     # only screen fields
+DBTABLENAME = "'optidrome.patient'"
 
-helpText =  "Serves record selector screen for patients.\n\n"
-#    "* Although in the database exists an intermediate table 'book/patient', I have not really implemented " \
-#    "that one book can have more than one patient. So, in the book record -> patient field, every single " \
-#    "combination of several patients counts as a different patient.\n\n" \
-
+helpText =  "Another record selector screen for the authors.\n\n" \
+    "* Although in the database exists an intermediate table 'book/author', I have not really implemented " \
+    "that one book can have more than one author. So, in the book record -> author field, every single " \
+    "combination of several authors counts as a different author.\n\n" \
+    "* Please excuse my Pythonic sense of humor in the Address field. It has allowed me for some alphabetical " \
+    "experiments. The Chinese characters are left in the field on purpose, to see their effect on the screen " \
+    "layout on Windows. The Linux terminal works fine though.\n\n" \
+    "* Please also see the help on the Book Selector and Book record for more info on field types."
 
 
 class PatientSelectForm(npyscreen.FormBaseNew):
-    "Patient selector and FCRUD options."
+    "Author selector and FCRUD options."
     def __init__(self, name="", parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=True, *args, **keywords):
         # Creates the father, npyscreen.FormBaseNew.
@@ -66,11 +68,11 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.formTitle=self.add(bs.MyTextfield, name="PatientTitle", value=None, relx=0, rely=0, \
             use_max_space=True, width=WIDTH, max_width=WIDTH, maximum_string_length=WIDTH, editable=False)
 
-        # Patients Grid
+        # Authors Grid
         self.grid = bs.MyGrid(screen=self, name="PatientGrid")      # (All attributes get filled later)
         self.grid.editing=True
-        self.columnTitles = [" ID   ","     Name"," DOB","   Address"," Phone","   Email"]
-        self.col_widths = [8, 28, 12, 10, 11, 11]    # fields must add up to WIDTH
+        self.columnTitles = ["MRN","     Name","   DOB","   Phone","   Email"]
+        self.col_widths = [8, 28, 11, 14, 19]    # fields must add up to WIDTH
 
         self.grid = self.add(self.grid.__class__, name="PatientGrid", col_titles=self.columnTitles, col_widths=self.col_widths, \
                 relx=0, rely=1, height=22, width=WIDTH, min_height=22, min_width=WIDTH, editable=True, hidden=False, \
@@ -90,7 +92,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.value = ""
         self.inputOpt.check_value_change=True
 
-        # Detail input field for 3-digit number, and also for Find-literal
+        # Detail input field for 3-digit numeral, and also for Find-literal
         self.inputDetail = self.add(bs.DetailField, screenForm=PatientForm, name='DetailFld', value="", relx=26, rely=24,
                                         width=5, height=0, max_width=5, max_height=0, 
                                         editable=True, hidden=True, use_max_space=True)
@@ -115,17 +117,14 @@ class PatientSelectForm(npyscreen.FormBaseNew):
             today = today[:6] + today[8:]
         return today
 
-# EDIT HERE:####################################################################
-
     def getRowListForScreen(self, filerows):
         "Memory row list to screen row list for grid."
         if len(filerows) > 0:
             self.screenFileRows = numpy.array(filerows)  # I need numpy to...
-#            self.screenFileRows = self.screenFileRows[:, 1:]  # ...cut the first field ("id")
-            self.screenFileRows = self.screenFileRows[:1]  # lol idunno what this does
+            self.screenFileRows = self.screenFileRows[:, 1:]  # ...cut the first field ("id")
             return self.screenFileRows.tolist()          # and again to list
         else:
-            empty_list = [["","","","","",""]]
+            empty_list = [["","","","",""]]
             return empty_list
 
     def readDBTable(self):
@@ -133,21 +132,21 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         cur = config.conn.cursor()
         while True:     # multiuser DB locking loop
             try:
-                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY patient_id")
+                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY mrn")
                 break   # go on
             except sqlite3.OperationalError:
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
         filerows = cur.fetchall()
         rows = []        
         for row in filerows:
-            patient_id = row[0]
-            name = row[1]
-            dob = row[2]
-            phone = row[3]
-            email = row[4]
-            address = row[5]
-            cRow = [patient_id, name, dob, phone, email, address]
-            rows.append(cRow)    # including Patient.id
+            id = row[0]
+            mrn = row[1]
+            name = row[2]
+            dob = row[3]
+            phone = row[4]
+            email = row[5]
+            cRow = [id, mrn, name, dob, phone, email]
+            rows.append(cRow)    # including Author.id
         self.set_up_title(filerows, full_set=True)
         return rows # it's a list of lists
 
@@ -158,7 +157,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.grid.values = self.screenFileRows
 
     def update_grid(self):
-        "Updates the affected row in the patient grid and RAM config table list."
+        "Updates the affected row in the author grid and RAM config table list."
         # After a change or creation, grid displays full set :
         if not REMEMBER_SUBSET or config.last_table != DBTABLENAME or \
                 (config.last_table == DBTABLENAME and config.last_operation == "Create") :
@@ -182,7 +181,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
     
     def create_row(self):
         "It's been keypressed C/c=Create."
-        # Lets display the empty patient form:
+        # Lets display the empty author form:
         self.inputDetail.option = "Create"
         self.inputOpt.value = "C"
         self.inputOpt.display()
@@ -201,7 +200,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
 
     def read_row(self):
         "It's been keypressed R/r=Read."
-        # (Must ask to confirm the searched patient_id)
+        # (Must ask to confirm the searched numeral)
         self.inputDetail.option = "Read"
         self.inputOpt.value = "R"
         self.inputOpt.display()
@@ -212,7 +211,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
         
         # Reset former status line field
-        self.statusLiteral = "Enter patient ID to read:                                                         "
+        self.statusLiteral = "Enter numeral to read:                                                         "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -222,24 +221,24 @@ class PatientSelectForm(npyscreen.FormBaseNew):
 
         self.grid.editing = False
 
-        searchedNumber = config.currentRow
+        searchedMRN = config.currentRow
         self.inputDetail.hidden = False
         self.inputDetail.editable = True
         self.inputDetail.relx = 26
         self.inputDetail.width = 5
         self.inputDetail.max_width = 5
         self.inputDetail.maximum_string_length = 3
-        self.inputDetail.value = str(searchedNumber)
+        self.inputDetail.value = str(searchedMRN)
         self.inputDetail.check_value_change=True
         self.inputDetail.editing = True    # grid exit
         self.inputDetail.how_exited = True     # self.find_next_editable, to default value
-        self.editw = 4      # Change to number input field
+        self.editw = 4      # Change to numeral input field
 
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
 
     def update_row(self):
         "It's been keypressed U/u=Update."
-        # (Must ask to confirm the searched number)
+        # (Must ask to confirm the searched numeral)
         self.inputDetail.option = "Update"
         self.inputOpt.value = "U"
         self.inputOpt.display()
@@ -250,7 +249,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
         
         # Reset former status line field
-        self.statusLiteral = "Enter patient ID to update:                                                         "
+        self.statusLiteral = "Enter numeral to update:                                                         "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -260,18 +259,18 @@ class PatientSelectForm(npyscreen.FormBaseNew):
 
         self.grid.editing = False
 
-        searchedNumber = config.currentRow
+        searchedMRN = config.currentRow
         self.inputDetail.hidden = False
         self.inputDetail.editable = True
         self.inputDetail.relx = 26
         self.inputDetail.width = 5
         self.inputDetail.max_width = 5
         self.inputDetail.maximum_string_length = 3
-        self.inputDetail.value = str(searchedNumber)
+        self.inputDetail.value = str(searchedMRN)
         self.inputDetail.check_value_change=True
         self.inputDetail.editing = True    # grid exit
         self.inputDetail.how_exited = True     # self.find_next_editable, to default value
-        self.editw = 4      # Change to number input field
+        self.editw = 4      # Change to numeral input field
         
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
     
@@ -315,7 +314,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
 
     def delete_row(self):
         "It's been keypressed D/d=Delete."
-        # (Must ask to confirm the searched number to delete)
+        # (Must ask to confirm the searched numeral to delete)
         self.inputDetail.option = "Delete"
         self.inputOpt.value = "D"
         self.inputOpt.display()
@@ -326,7 +325,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.hidden = True
 
         # Reset former status line field
-        self.statusLiteral = "Enter patient ID to delete:                                                       "
+        self.statusLiteral = "Enter MRN to delete:                                                       "
         self.statusLine.relx=0
         self.statusLine.width=79
         self.statusLine.max_width=79
@@ -336,33 +335,33 @@ class PatientSelectForm(npyscreen.FormBaseNew):
 
         self.grid.editing = False
 
-        searchedNumber = config.currentRow
+        searchedMRN = config.currentRow
         self.inputDetail.hidden = False
         self.inputDetail.editable = True
         self.inputDetail.relx = 26
         self.inputDetail.width = 5
         self.inputDetail.max_width = 5
         self.inputDetail.maximum_string_length = 3
-        self.inputDetail.value = str(searchedNumber)
+        self.inputDetail.value = str(searchedMRN)
         self.inputDetail.check_value_change=True
         self.inputDetail.editing = True    # grid exit
         self.inputDetail.how_exited = True     # self.find_next_editable, to default value
-        self.editw = 4      # Change to number input field
+        self.editw = 4      # Change to numeral input field
         
         self.edit() # waiting for Enter/Esc in the field -see its method get_and_use_key_press()
 
-    def read_record(self, patient_id):
+    def read_record(self, mrn):
         "Search for the required record and store it in a reachable variable. Called from the Detail-field widget."
         config.screenRow = 0
         config.fileRow = []
         for row in config.fileRows:
-            if row[0] == patient_id:  # changed from 1
+            if row[1] == mrn:
                 cur = config.conn.cursor()
                 while True:     # multiuser DB locking loop
                     try:
                         # I could just use .append(row[0]) below, but I read again to allow for record locking
-                        sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE patient_id=?"
-                        cur.execute(sqlQuery, (str(patient_id),) )
+                        sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE mrn=?"
+                        cur.execute(sqlQuery, (str(mrn),) )
                         break   # go on
                     except sqlite3.OperationalError:
                         bs.notify_OK("\n    Database is locked, please wait.", "Message")
@@ -373,6 +372,8 @@ class PatientSelectForm(npyscreen.FormBaseNew):
                 config.fileRow.append(filerow[3])
                 config.fileRow.append(filerow[4])
                 config.fileRow.append(filerow[5])
+                config.fileRow.append(filerow[6])
+                config.fileRow.append(filerow[7])
                 self.grid.edit_cell = [config.screenRow, 0]  # highlight the selected row
                 # If the searched index is greater than the first index displayed on screen
                 if config.screenRow > self.grid.begin_row_display_at:
@@ -384,9 +385,9 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         return False    # not found
 
     def exitPatientSelector(self):
-        "Escape key was pressed: isinstance(self, PatientSelectForm) = True; we always come from the OptionField."
+        "Escape key was pressed: isinstance(self, AuthorSelectForm) = True; we always come from the OptionField."
         get_out = False
-        if self.statusLine.value != self.optionsLiteral:    # it's not the options statusline; it's the number field
+        if self.statusLine.value != self.optionsLiteral:    # it's not the options statusline; it's the numeral field
             # we come from DetailField : we must restore the options statusline and get back to the OptionField
             self.hide_detail()
             self.ask_option()
@@ -465,12 +466,12 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         sqlQuery = "SELECT * FROM " + DBTABLENAME + " WHERE "
         if not comparator:
             if field == False:  # no field specified, so search all fields
-                whereStr = "patient_id LIKE ? OR name LIKE ? OR dob LIKE ?" +\
-                    " OR phone LIKE ? OR email LIKE ? OR address LIKE ? COLLATE NOCASE ORDER BY patient_id"
+                whereStr = "mrn LIKE ? OR name LIKE ? OR dob LIKE ?" +\
+                    " OR phone LIKE ? OR email LIKE ? OR address LIKE ? COLLATE NOCASE ORDER BY mrn"
             else:
-                whereStr = field + " LIKE ? COLLATE NOCASE ORDER BY patient_id"
+                whereStr = field + " LIKE ? COLLATE NOCASE ORDER BY mrn"
         elif comparator:
-            whereStr = field + " " + comparator + " ? COLLATE NOCASE ORDER BY patient_id"
+            whereStr = field + " " + comparator + " ? COLLATE NOCASE ORDER BY mrn"
 
         sqlQuery += whereStr
 
@@ -496,7 +497,7 @@ class PatientSelectForm(npyscreen.FormBaseNew):
         rows = []        
         for row in filerows:
             cRow = [row[0], row[1], row[2], row[3], row[4], row[5]]
-            rows.append(cRow)    # including Patient.id
+            rows.append(cRow)    # including Author.id
         config.fileRows = rows
         self.screenFileRows = self.getRowListForScreen(config.fileRows)     # it's a list of lists
         self.grid.values = self.screenFileRows

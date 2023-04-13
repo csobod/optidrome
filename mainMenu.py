@@ -21,8 +21,8 @@ import linecache
 import npyscreen
 from npyscreen import util_viewhelp
 
-#import author
-#import authorSelector
+import patient
+import patientSelector
 #import book
 #import bookListing
 #import bookSelector
@@ -34,7 +34,7 @@ import identification
 #import publisherSelector
 import user
 import userSelector
-#import utilities
+import utilities
 #import warehouse
 #import warehouseSelector
 #import dbIntegrityCheck
@@ -94,10 +94,10 @@ class optidromeApp(npyscreen.NPSAppManaged):
 #            help=bookSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 #        self.registerForm("BOOK", book.BookForm(name="BookForm", parentApp=self, \
 #            help=book.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-#        self.registerForm("AUTHORSELECTOR", authorSelector.AuthorSelectForm(name="AuthorSelector", parentApp=self, \
-#            help=authorSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-#        self.registerForm("AUTHOR", author.AuthorForm(name="AuthorForm", parentApp=self, \
-#            help=author.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("PATIENTSELECTOR", patientSelector.PatientSelectForm(name="PatientSelector", parentApp=self, \
+            help=patientSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("PATIENT", patient.PatientForm(name="PatientForm", parentApp=self, \
+            help=patient.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 #        self.registerForm("PUBLISHERSELECTOR", publisherSelector.PublisherSelectForm(name="PublisherSelector", parentApp=self, \
 #            help=publisherSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 #        self.registerForm("PUBLISHER", publisher.PublisherForm(name="PublisherForm", parentApp=self, \
@@ -108,8 +108,8 @@ class optidromeApp(npyscreen.NPSAppManaged):
 #            help=warehouse.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
 #        self.registerForm("BOOKLISTING", bookListing.BookListingForm(name="BookListingForm", parentApp=self, \
 #            help=bookListing.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-#        self.registerForm("UTILITIES", utilities.UtilitiesMenuForm(name="UtilitiesForm", parentApp=self, \
-#            help=utilities.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("UTILITIES", utilities.UtilitiesMenuForm(name="UtilitiesForm", parentApp=self, \
+            help=utilities.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("USERSELECTOR", userSelector.UserSelectForm(name="UserSelector", parentApp=self, \
             help=userSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("USER", user.UserForm(name="UserForm", parentApp=self, \
@@ -127,9 +127,9 @@ class optidromeApp(npyscreen.NPSAppManaged):
 #        elif self.NEXT_ACTIVE_FORM == 'BOOKSELECTOR':
 #            form = self._Forms["BOOKSELECTOR"]
 #            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-#        elif self.NEXT_ACTIVE_FORM == 'AUTHORSELECTOR':
-#            form = self._Forms["AUTHORSELECTOR"]
-#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+        elif self.NEXT_ACTIVE_FORM == 'PATIENTSELECTOR':
+            form = self._Forms["PATIENTSELECTOR"]
+            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
 #        elif self.NEXT_ACTIVE_FORM == 'PUBLISHERSELECTOR':
 #            form = self._Forms["PUBLISHERSELECTOR"]
 #            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
@@ -217,11 +217,11 @@ class MainMenuForm(npyscreen.FormBaseNew):
 
     def mainSelector(self):
         value_list = [
-           "1. Book edition",
-           "2. Author edition",
-           "3. Publisher edition",
-           "4. Warehouse edition",
-           "5. Book listing",
+           "1. Processing orders",
+           "2. Patient database",
+           "3. Order database",
+           "4. Laboratory database",
+           "5. Inventory database",
            "6. Utilities",
            "Q. Quit program" ]
 
@@ -250,7 +250,7 @@ class MainMenuForm(npyscreen.FormBaseNew):
                 self.selector.cursor_line=1
                 self.display()
                 time.sleep(0.2)
-                self.menuAuthorSelector()
+                self.menuPatientSelector()
             case 51:    # menu 3
                 self.selector.cursor_line=2
                 self.display()
@@ -284,12 +284,12 @@ class MainMenuForm(npyscreen.FormBaseNew):
         selectorForm.ask_option()
         self.app.switchForm("BOOKSELECTOR")
         
-    def menuAuthorSelector(self):
+    def menuPatientSelector(self):
         # Calls authors selector
-        selectorForm = self.parentApp._Forms['AUTHORSELECTOR']
+        selectorForm = self.parentApp._Forms['PATIENTSELECTOR']
         selectorForm.update_grid()  # must be read here to get config.fileRows right
         selectorForm.ask_option()
-        self.app.switchForm("AUTHORSELECTOR")
+        self.app.switchForm("PATIENTSELECTOR")
         
     def menuPublisherSelector(self):
         # Calls publishers selector
@@ -391,7 +391,7 @@ class VerticalMenu(bs.MyMultiLineAction):
         if act_on_this[0] == "1":   # Book selector
             form.menuBookSelector()
         elif act_on_this[0] == "2": # Author selector
-            form.menuAuthorSelector()
+            form.menuPatientSelector()
         elif act_on_this[0] == "3": # Publisher selector
             form.menuPublisherSelector()
         elif act_on_this[0] == "4": # Warehouse selector

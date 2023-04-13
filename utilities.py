@@ -89,7 +89,7 @@ class UtilitiesMenuForm(npyscreen.FormBaseNew):
     def mainSelector(self):
         value_list = [
            "1. User management",
-           "2. Check database referential integrity",
+           "2. Check database integrity",
            "3. Delete multiple records",
            "Q. Quit utilities" ]
 

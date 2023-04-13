@@ -29,16 +29,16 @@ import numpy
 
 import bsWidgets as bs
 import config
-from rxorder import RxOrderForm
+from rxorder import BookForm
 from config import SCREENWIDTH as WIDTH
 
 REMEMBER_ROW = True    # remember the last row selected when coming from main menu
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last 'Find' result subset
 DATEFORMAT = config.dateFormat  # program-wide
-FIELD_LIST = ["order_id","patient_id","","year","publisher","date","isbn"]  # only screen fields, not DB
-DBTABLENAME = "'rxorder'"
+FIELD_LIST = ["numeral","title","author","year","publisher","date","isbn"]  # only screen fields, not DB
+DBTABLENAME = "'bookstore.book'"
 
-helpText =  "The order selector is a grid of database table rows (records).\n\n" +\
+helpText =  "The book selector is a grid of database table rows (records).\n\n" +\
     "* Use the arrow keys, Page Up/Down and Home/End to navigate the grid.\n\n" +\
     "* Under the grid there's a bottom line with the operating F+CRUD options. " +\
     "You can switch between the record grid and the options line with TAB key.\n\n" +\
@@ -55,7 +55,7 @@ helpText =  "The order selector is a grid of database table rows (records).\n\n"
     "By default, the record grid 'remembers' the result of the last search. This behaviour can be changed by variable. "    
 
 
-class RxOrderSelectForm(npyscreen.FormBaseNew):
+class BookSelectForm(npyscreen.FormBaseNew):
     "Book selector and FCRUD options."
     def __init__(self, name="", parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=True, *args, **keywords):
@@ -70,7 +70,7 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
     def create(self):
         "The standard constructor will call the method .create(), which you should override to create the Form widgets."
         self.framed = False   # frameless form
-        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exitRxOrderSelector   # Escape exit
+        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exitBookSelector   # Escape exit
         
         # Form title - Screen title line
         pname, version = config.pname, config.program_version
@@ -104,7 +104,7 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.check_value_change=True
 
         # Detail input field for 6-digit numeral, and also for Find-literal
-        self.inputDetail = self.add(bs.DetailField, screenForm=RxOrderForm, name='DetailFld', value="", relx=26, rely=24,
+        self.inputDetail = self.add(bs.DetailField, screenForm=BookForm, name='DetailFld', value="", relx=26, rely=24,
                                         width=8, height=0, max_width=8, max_height=0, 
                                         editable=True, hidden=True, use_max_space=True)
         
@@ -217,9 +217,9 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
         self.grid.editing = False
         self.inputDetail.relx = 26 # just in case
         self.ask_option()  # for when we are back to this screen
-        config.parentApp.setNextForm("RXORDER")
+        config.parentApp.setNextForm("BOOK")
         config.parentApp.switchFormNow()
-        RxOrderForm.set_createMode()
+        BookForm.set_createMode()
 
     def read_row(self):
         "It's been keypressed R/r=Read."
@@ -421,8 +421,8 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
         time.sleep(0.6)     # let it be seen
         return False    # not found
 
-    def exitRxOrderSelector(self):
-        "Escape key was pressed: isinstance(self, RxOrderSelectForm) = True; we always come from the OptionField."
+    def exitBookSelector(self):
+        "Escape key was pressed: isinstance(self, BookSelectForm) = True; we always come from the OptionField."
         get_out = False
         if self.statusLine.value != self.optionsLiteral:    # it's not the option statusline; it's the detail field
             # we come from DetailField : we have to restore the option statusline and come back to the OptionField
@@ -558,11 +558,11 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
                 bs.notify_OK("Find: Error in date literal", "Message")
                 return False
 
-        fieldStr = "'bookstore.book'.id, 'bookstore.book'.numeral, 'bookstore.book'.book_title, 'optidrome.patient'.name, \
+        fieldStr = "'bookstore.book'.id, 'bookstore.book'.numeral, 'bookstore.book'.book_title, 'bookstore.author'.name, \
             'bookstore.book'.year, 'bookstore.publisher'.name, 'bookstore.book'.creation_date, 'bookstore.book'.isbn"
         sqlQuery = "SELECT " + fieldStr + " FROM " + DBTABLENAME + \
             " INNER JOIN 'bookstore.book_author' ON 'bookstore.book_author'.book_num = 'bookstore.book'.numeral " + \
-            " INNER JOIN 'optidrome.patient' ON 'optidrome.patient'.numeral = 'bookstore.book_author'.author_num " + \
+            " INNER JOIN 'bookstore.author' ON 'bookstore.author'.numeral = 'bookstore.book_author'.author_num " + \
             " INNER JOIN 'bookstore.publisher' ON 'bookstore.publisher'.numeral = 'bookstore.book'.publisher_num "
             
         if field == "numeral":
@@ -570,7 +570,7 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
         elif field == "title":
             field = "book_title"
         elif field == "author":
-            field = "'optidrome.patient'.name"
+            field = "'bookstore.author'.name"
         elif field == "publisher":
             field = "'bookstore.publisher'.name"
         elif field == "date":
@@ -588,7 +588,7 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
                 else:
                     whereStr = "WHERE 'bookstore.book'.numeral LIKE ?" \
                         " OR 'bookstore.book'.book_title LIKE ?" \
-                        " OR 'optidrome.patient'.name LIKE ?" \
+                        " OR 'bookstore.author'.name LIKE ?" \
                         " OR 'bookstore.book'.year LIKE ?" \
                         " OR 'bookstore.publisher'.name LIKE ?" \
                         " OR 'bookstore.book'.creation_date LIKE ?" \
@@ -681,7 +681,7 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
             is_main_author = row[3]
             if is_main_author:  # = is main author
                 author_num = row[2]
-                sqlQuery = "SELECT * FROM 'optidrome.patient' WHERE numeral=?"
+                sqlQuery = "SELECT * FROM 'bookstore.author' WHERE numeral=?"
                 try:
                     cur.execute( sqlQuery, (str(author_num),) )
                 except sqlite3.Error as e:
@@ -713,5 +713,5 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
 
     def textfield_exit(self):
         "Exit from Detail field with Escape"
-        self.exitRxOrderSelector()
+        self.exitBookSelector()
         #pass    # do nothing = don't exit
