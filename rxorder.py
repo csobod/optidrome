@@ -24,7 +24,7 @@ import bsWidgets as bs
 import config
 
 DATEFORMAT = config.dateFormat
-DBTABLENAME = "'bookstore.book'"
+DBTABLENAME = "'optidrome.rxorder'"
 
 global form
 
@@ -47,9 +47,9 @@ helpText =  "The book form is a typical record selector form.\n\n" +\
     "* 'Price' is a money field, designed to accept digits and point/comma."
 
 
-class BookForm(npyscreen.FormBaseNew):
-    "Book record on screen for maintenance."
-    def __init__(self, name="Book", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
+class RxOrderForm(npyscreen.FormBaseNew):
+    "Order record on screen for maintenance."
+    def __init__(self, name="RxOrder", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
         widget_list=None, cycle_widgets=False, ok_button_function=None, cancel_button_function=None, *args, **keywords):
 
         # Creates the father, npyscreen.FormBaseNew.
@@ -58,71 +58,68 @@ class BookForm(npyscreen.FormBaseNew):
         global form
         form = self
 
-        self.selectorForm = self.parentApp._Forms['BOOKSELECTOR']
+        self.selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
 
     def create(self):
         "The standard constructor will call the method .create(), which you should override to create the Form widgets."
         self.framed = True   # framed form
-        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exit_book   # Escape exit
+        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exit_rxorder   # Escape exit
         
         # Form title
 
         pname, version = config.pname, config.program_version
-        self.formTitle = pname + " " + version + " - Book record "
-        self.formTitleFld=self.add(bs.MyFixedText, name="BookTitle", value=self.formTitle, relx=2, rely=0, editable=False)  # Screen title line
+        self.formTitle = pname + " " + version + " - Order record "
+        self.formTitleFld=self.add(bs.MyFixedText, name="RxOrderTitle", value=self.formTitle, relx=2, rely=0, editable=False)  # Screen title line
 
         # Form fields
 
-        self.numeralFld=self.add(bs.MyTitleText, name="Numeral:", value="", relx=10, rely=4, begin_entry_at=15, editable=False)
+        self.jobFld=self.add(bs.MyTitleText, name="Job №.", value="", relx=6, rely=4, begin_entry_at=13, editable=False)
+        self.creationDateFld=self.add(bs.TitleDateField, name="Creation date:", value="", format=DATEFORMAT, relx=22, rely=4, begin_entry_at=25, editable=False)
 
-        self.bookTitleFld=self.add(bs.MyTitleText, name="Title:", value="", relx=10, rely=5, begin_entry_at=15, \
-            fixed_length=False, editable=False)
-        self.originalTitleFld=self.add(bs.MyTitleText, name="Orig. title:", value="", relx=10, rely=6, \
-            begin_entry_at=15, fixed_length=False, editable=False)
+#        self.dateFld=self.add(bs.MyTitleDate, name="Date:", value="", relx=10, rely=5, begin_entry_at=15, editable=False)
 
-        self.authorValues = self.get_all_authors()
-        self.authorFld=self.add(bs.TitleChooser, name="Author:", value="", values=self.authorValues, popupType="narrow", \
+        self.patientValues = self.get_all_patients()
+        self.patientFld=self.add(bs.TitleChooser, name="Patient:", value="", values=self.patientValues, popupType="narrow", \
             relx=10, rely=7, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
             height=0, max_height=0, check_value_change=True, editable=False)
-        self.authorLabel=self.add(bs.MyFixedText, name="AuthorLabel", value="[+]", relx=58, rely=7, min_width=4, max_width=4, \
+        self.patientLabel=self.add(bs.MyFixedText, name="PatientLabel", value="[+]", relx=58, rely=7, min_width=4, max_width=4, \
             min_height=0, max_height=0, use_max_space=False, editable=False)
 
-        self.descriptionFld=self.add(bs.MyTitleText, name="Description:", value="", relx=10, rely=8, begin_entry_at=15, editable=False)
+        self.vendorValues = self.get_all_vendors()
+        self.vendorFld=self.add(bs.TitleChooser, name="Vendor:", value="", values=self.vendorValues, popupType="narrow", \
+            relx=10, rely=9, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
+            height=0, max_height=0, check_value_change=True, editable=False)
+        self.vendorLabel=self.add(bs.MyFixedText, name="VendorLabel", value="[+]", relx=58, rely=9, min_width=4, max_width=4, \
+            min_height=0, max_height=0, use_max_space=False, editable=False)
         
-        self.isbnFld=self.add(bs.MyTitleText, name="ISBN/SKU:", value="", relx=10, rely=9, begin_entry_at=15, editable=False)
-
-        self.yearFld=self.add(bs.MyTitleYear, name="Public. year:", value="", relx=10, rely=10, begin_entry_at=15, 
-            width=22, max_width=22, use_max_space=False, use_two_lines=False, editable=False)
-
-        self.publisherValues = self.get_all_publishers()
-        self.publisherFld=self.add(bs.TitleChooser, name="Publisher:", value="", values=self.publisherValues, popupType="narrow", \
-            relx=10, rely=11, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
+        self.labValues = self.get_all_labs()
+        self.labFld=self.add(bs.TitleChooser, name="Lab:", value="", values=self.labValues, popupType="narrow", \
+            relx=10, rely=10, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
             height=0, max_height=0, check_value_change=True, editable=False)
-        self.publisherLabel=self.add(bs.MyFixedText, name="PublisherLabel", value="[+]", relx=58, rely=11, min_width=4, max_width=4, \
+        self.labLabel=self.add(bs.MyFixedText, name="LabLabel", value="[+]", relx=10, rely=10, min_width=4, max_width=4, \
             min_height=0, max_height=0, use_max_space=False, editable=False)
+        
 
-        self.creationDateFld=self.add(bs.TitleDateField, name="Creation date:", value="", format=DATEFORMAT, 
-            relx=10, rely=12, begin_entry_at=15, editable=False)
+### Genre List, Reconfigure for new options in config.py
+#        self.genreValues = config.genreList
+#        self.genreFld=self.add(bs.TitleChooser, name="Genre:", value="", values=self.genreValues, popupType="narrow",\
+#            relx=10, rely=13, begin_entry_at=15, use_max_space=False, max_width=30, editable=False)
+#        self.genreLabel=self.add(bs.MyFixedText, name="GenreLabel", value="[+]", relx=58, rely=13, min_width=4, max_width=4, \
+#            min_height=0, max_height=0, use_max_space=False, editable=False)
 
-        self.genreValues = config.genreList
-        self.genreFld=self.add(bs.TitleChooser, name="Genre:", value="", values=self.genreValues, popupType="narrow",\
-            relx=10, rely=13, begin_entry_at=15, use_max_space=False, max_width=30, editable=False)
-        self.genreLabel=self.add(bs.MyFixedText, name="GenreLabel", value="[+]", relx=58, rely=13, min_width=4, max_width=4, \
-            min_height=0, max_height=0, use_max_space=False, editable=False)
+#        self.coverTypeValues = config.coverTypeList
 
-        self.coverTypeValues = config.coverTypeList
+#        self.coverTypeFld=self.add(bs.TitleChooser, name="Cover type:", value="", values=self.coverTypeValues, popupType="narrow",\
+#            relx=10, rely=14, begin_entry_at=15, use_max_space=False, max_width=49, editable=False)
+#        self.coverTypeLabel=self.add(bs.MyFixedText, name="CoverTypeLabel", value="[+]", relx=58, rely=14, min_width=4, max_width=4, \
+#            min_height=0, max_height=0, use_max_space=False, editable=False)
 
-        self.coverTypeFld=self.add(bs.TitleChooser, name="Cover type:", value="", values=self.coverTypeValues, popupType="narrow",\
-            relx=10, rely=14, begin_entry_at=15, use_max_space=False, max_width=49, editable=False)
-        self.coverTypeLabel=self.add(bs.MyFixedText, name="CoverTypeLabel", value="[+]", relx=58, rely=14, min_width=4, max_width=4, \
-            min_height=0, max_height=0, use_max_space=False, editable=False)
-
-        self.warehousesValues = self.get_all_warehouses()
-        self.warehousesFld=self.add(bs.TitleChooser, name="Warehouses:", value="", values=self.warehousesValues, popupType="narrow", \
-            relx=10, rely=15, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
-            height=0, max_height=0, check_value_change=True, editable=False)
-        self.warehousesLabel=self.add(bs.MyFixedText, name="WarehousesLabel", value="[+]", relx=58, rely=15, min_width=4, max_width=4, \
-            min_height=0, max_height=0, use_max_space=False, editable=False)
+#        self.warehousesValues = self.get_all_warehouses()
+#        self.warehousesFld=self.add(bs.TitleChooser, name="Warehouses:", value="", values=self.warehousesValues, popupType="narrow", \
+#            relx=10, rely=15, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
+#            height=0, max_height=0, check_value_change=True, editable=False)
+#        self.warehousesLabel=self.add(bs.MyFixedText, name="WarehousesLabel", value="[+]", relx=58, rely=15, min_width=4, max_width=4, \
+#            min_height=0, max_height=0, use_max_space=False, editable=False)
 
         self.priceLabel = "Price " + config.currency_symbol + ":"
         self.ndecimals = config.ndecimals
@@ -136,123 +133,167 @@ class BookForm(npyscreen.FormBaseNew):
 
         # Status line
 
-        self.statusLine=self.add(npyscreen.FixedText, name="BookStatus", value="", relx=2, rely=23, use_max_space=True, editable=False)
+        self.statusLine=self.add(npyscreen.FixedText, name="RxOrderStatus", value="", relx=2, rely=23, use_max_space=True, editable=False)
 
     def reload(self):
         ".init and .create functions are only executed once. We need a function to execute every time we come from main_menu->selector."
-        # Reload authors into the chooser field
-        self.authorValues = self.get_all_authors()
-        chooser = self.authorFld.entry_widget
-        chooser.load_values(self.authorValues)
-        self.authorFld.update(clear=True)
+        # Reload patients into the chooser field
+        self.patientValues = self.get_all_patients()
+        chooser = self.patientFld.entry_widget
+        chooser.load_values(self.patientValues)
+        self.patientFld.update(clear=True)
         # Reload publishers into the chooser field
-        self.publisherValues = self.get_all_publishers()
-        chooser = self.publisherFld.entry_widget
-        chooser.load_values(self.publisherValues)
-        self.publisherFld.update(clear=True)
-        chooser = self.warehousesFld.entry_widget
-        chooser.load_values(self.warehousesValues)
+#        self.publisherValues = self.get_all_publishers()
+#        chooser = self.publisherFld.entry_widget
+#        chooser.load_values(self.publisherValues)
+#        self.publisherFld.update(clear=True)
+#        chooser = self.warehousesFld.entry_widget
+#        chooser.load_values(self.warehousesValues)
 
-    def get_all_authors(self):
-        "Returns a list of authors from DB"
+    def get_all_patients(self):
+        "Returns a list of patients from DB"
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT name FROM 'bookstore.Author' ORDER BY name")
+        cur.execute("SELECT name FROM 'optidrome.patient' ORDER BY name")
         filerows = cur.fetchall()
-        author_list = []
+        patient_list = []
         for row in filerows:
-            author_list.append((row[0],))    # authors = [('literal',)]
+            patient_list.append((row[0],))    # patients = [('literal',)]
         # We need PyICU (=icu) to order unicode strings in Spanish, Catalan, French...
         collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-        aux_list = [i[0] for i in author_list]
+        aux_list = [i[0] for i in patient_list]
         aux_list.sort(key=collator.getSortKey)
-        author_list = [(i,) for i in aux_list]
-        return author_list
-        
-    def get_all_publishers(self):
-        "Returns a list of publishers from DB"
+        patient_list = [(i,) for i in aux_list]
+        return patient_list
+    
+    def get_all_vendors(self):
+        "Returns a list of vendors from DB where is_lab is False"
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT numeral, name FROM 'bookstore.Publisher' ORDER BY name")
+        cur.execute("SELECT name FROM 'optidrome.vendor' WHERE is_lab = 0 ORDER BY name")
         filerows = cur.fetchall()
-        publisher_list = []
-        publisher_dict = {}
+        vendor_list = []
+        vendor_dict = {}
         for row in filerows:
-            numeral = row[0]
+            vendor_num = row[0]
             name = row[1]
-            publisher_list.append(name)
-            publisher_dict[name] = numeral 
+            vendor_list.append(name)
+            vendor_dict[name] = vendor_num
         # We need PyICU (=icu) to order unicode strings in spanish+catalan
         collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-        aux_list = [i for i in publisher_list]
+        aux_list = [i for i in vendor_list]
         aux_list.sort(key=collator.getSortKey)
 
-        publisher_list = [(publisher_dict[i],i) for i in aux_list]
-        
-        return publisher_list
+        vendor_list = [(vendor_dict[i],i) for i in aux_list]
 
-    def get_all_warehouses(self):
-        "Gets and returns all warehouses from the database."
+        return vendor_list
+    
+    def get_all_labs(self):
+        "Returns a list of labs from DB where is_lab is True"
         conn = config.conn
         cur = conn.cursor()
-        cur.execute("SELECT code FROM 'bookstore.Warehouse' ORDER BY code")
+        cur.execute("SELECT name FROM 'optidrome.vendor' WHERE is_lab = 1 ORDER BY name")
         filerows = cur.fetchall()
+        lab_list = []
+        lab_dict = {}
+        for row in filerows:
+            lab_num = row[0]
+            name = row[1]
+            lab_list.append(name)
+            lab_dict[name] = lab_num
         # We need PyICU (=icu) to order unicode strings in spanish+catalan
         collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-        aux_list = [i[0] for i in filerows]
+        aux_list = [i for i in lab_list]
         aux_list.sort(key=collator.getSortKey)
-        wh_list = [(i,) for i in aux_list]
-        return wh_list
 
-    def get_book_warehouses(self):
-        "Read all the warehouses of this book."
-        conn = config.conn
-        cur = conn.cursor()
-        book_num = self.numeralFld.value
-        sqlQuery = "SELECT warehouse_num FROM 'bookstore.book_warehouse' WHERE book_num=? ORDER BY warehouse_num"
-        cur.execute(sqlQuery, (book_num,) )
-        filerows = cur.fetchall()
-        warehousesField = self.set_warehouses_field(filerows)
-        return warehousesField
+        lab_list = [(lab_dict[i],i) for i in aux_list]
 
-    def set_warehouses_field(self, filerows):
-        "Sets a string enumerating the warehouse(s) code(s) of this book."
-        conn = config.conn
-        cur = conn.cursor()
-        whList = []
-        count = 0
-        for wh in filerows:
-            sqlQuery = "SELECT code FROM 'bookstore.warehouse' WHERE numeral=? ORDER BY numeral"
-            cur.execute(sqlQuery, ( str(wh[0]),) )
-            try:
-                filerow = cur.fetchone()
-                whList.append(filerow)
-            except TypeError:
-                bs.notify_OK("\n     Publisher of numeral " + str(wh[0]) + " was not found. ", "Message")
-
-        fieldString = ""
-        for wh in whList:
-            if count > 0:
-                fieldString += ", "
-            count += 1
-            fieldString += wh[0]
+        return lab_list
         
-        return fieldString
-
+#    def get_all_publishers(self):
+#        "Returns a list of publishers from DB"
+#        conn = config.conn
+#        cur = conn.cursor()
+#        cur.execute("SELECT numeral, name FROM 'bookstore.Publisher' ORDER BY name")
+#        filerows = cur.fetchall()
+#        publisher_list = []
+#        publisher_dict = {}
+#        for row in filerows:
+#            numeral = row[0]
+#            name = row[1]
+#            publisher_list.append(name)
+#            publisher_dict[name] = numeral 
+#        # We need PyICU (=icu) to order unicode strings in spanish+catalan
+#        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
+#        aux_list = [i for i in publisher_list]
+#        aux_list.sort(key=collator.getSortKey)
+#
+#        publisher_list = [(publisher_dict[i],i) for i in aux_list]
+#        
+#        return publisher_list
+#
+#    def get_all_warehouses(self):
+#        "Gets and returns all warehouses from the database."
+#        conn = config.conn
+#        cur = conn.cursor()
+#        cur.execute("SELECT code FROM 'bookstore.Warehouse' ORDER BY code")
+#        filerows = cur.fetchall()
+#        # We need PyICU (=icu) to order unicode strings in spanish+catalan
+#        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
+#        aux_list = [i[0] for i in filerows]
+#        aux_list.sort(key=collator.getSortKey)
+#        wh_list = [(i,) for i in aux_list]
+#        return wh_list
+#
+#    def get_book_warehouses(self):
+#        "Read all the warehouses of this book."
+#        conn = config.conn
+#        cur = conn.cursor()
+#        book_num = self.jobFld.value
+#        sqlQuery = "SELECT warehouse_num FROM 'bookstore.book_warehouse' WHERE book_num=? ORDER BY warehouse_num"
+#        cur.execute(sqlQuery, (book_num,) )
+#        filerows = cur.fetchall()
+#        warehousesField = self.set_warehouses_field(filerows)
+#        return warehousesField
+#
+#    def set_warehouses_field(self, filerows):
+#        "Sets a string enumerating the warehouse(s) code(s) of this book."
+#        conn = config.conn
+#        cur = conn.cursor()
+#        whList = []
+#        count = 0
+#        for wh in filerows:
+#            sqlQuery = "SELECT code FROM 'bookstore.warehouse' WHERE numeral=? ORDER BY numeral"
+#            cur.execute(sqlQuery, ( str(wh[0]),) )
+#            try:
+#                filerow = cur.fetchone()
+#                whList.append(filerow)
+#            except TypeError:
+#                bs.notify_OK("\n     Publisher of numeral " + str(wh[0]) + " was not found. ", "Message")
+#
+#        fieldString = ""
+#        for wh in whList:
+#            if count > 0:
+#                fieldString += ", "
+#            count += 1
+#            fieldString += wh[0]
+#        
+#        return fieldString
+#
     def backup_fields(self):
         "Fill backup variables"
-        self.bu_numeral = self.numeralFld.value
-        self.bu_bookTitle = self.bookTitleFld.value
-        self.bu_originalTitle = self.originalTitleFld.value
-        self.bu_author = self.authorFld.value
-        self.bu_description = self.descriptionFld.value
-        self.bu_isbn = self.isbnFld.value
-        self.bu_year = self.yearFld.value
-        self.bu_publisher = self.publisherFld.value  
+        self.bu_job = self.jobFld.value
+#        self.bu_bookTitle = self.bookTitleFld.value
+#        self.bu_originalTitle = self.originalTitleFld.value
+        self.bu_patient = self.patientFld.value
+#        self.bu_description = self.descriptionFld.value
+#        self.bu_isbn = self.isbnFld.value
+#        self.bu_year = self.yearFld.value
+#        self.bu_publisher = self.publisherFld.value  
         self.bu_creationDate = self.creationDateFld.value  
-        self.bu_genre = self.genreFld.value  
-        self.bu_coverType = self.coverTypeFld.value  
-        self.bu_warehouses = self.warehousesFld.value  
+#        self.bu_genre = self.genreFld.value  
+#        self.bu_coverType = self.coverTypeFld.value  
+#        self.bu_warehouses = self.warehousesFld.value  
         self.bu_price = self.priceFld.value  
 
     def update_fileRow(self):
@@ -263,28 +304,28 @@ class BookForm(npyscreen.FormBaseNew):
                 if row[0] == id:
                     config.fileRow = []
                     config.fileRow.append(row[0])
-                    config.fileRow.append(int(self.numeralFld.value))
-                    config.fileRow.append(self.bookTitleFld.value)
-                    config.fileRow.append(self.originalTitleFld.value)
-                    config.fileRow.append(self.authorFld.value)
-                    config.fileRow.append(self.descriptionFld.value)
-                    config.fileRow.append(self.isbnFld.value)
-                    config.fileRow.append(self.yearFld.value)
-                    config.fileRow.append(self.publisherFld.value)
+                    config.fileRow.append(int(self.jobFld.value))
+#                    config.fileRow.append(self.bookTitleFld.value)
+#                    config.fileRow.append(self.originalTitleFld.value)
+                    config.fileRow.append(self.patientFld.value)
+#                    config.fileRow.append(self.descriptionFld.value)
+#                    config.fileRow.append(self.isbnFld.value)
+#                    config.fileRow.append(self.yearFld.value)
+#                    config.fileRow.append(self.publisherFld.value)
                     config.fileRow.append(self.creationDateFld.value)
-                    config.fileRow.append(self.genreFld.value)
-                    config.fileRow.append(self.coverTypeFld.value)
+#                    config.fileRow.append(self.genreFld.value)
+#                    config.fileRow.append(self.coverTypeFld.value)
                     price = self.priceFld.value.replace(",", ".")   # here, no matter config.decimal_symbol
                     config.fileRow.append(Decimal(price))
                     break
         elif self.current_option == "Delete":
             pass
 
-    def exit_book(self):
+    def exit_rxorder(self):
         "Only for escape-exit, handler version."
-        self.exitBook(modified=False)
+        self.exitRxOrder(modified=False)
 
-    def exitBook(self, modified):
+    def exitRxOrder(self, modified):
         "Exit record form."
         if modified:    # modify grid if needed
             self.update_fileRow()
@@ -296,13 +337,13 @@ class BookForm(npyscreen.FormBaseNew):
         config.conn.close()
         self.parentApp.connect_database()
 
-        config.parentApp.setNextForm("BOOKSELECTOR")
+        config.parentApp.setNextForm("RXORDERSELECTOR")
         config.parentApp.switchFormNow()
 
-    def get_last_numeral(self, table_name):
+    def get_last_job(self, table_name):
         "Get the last numeral in the table."
         cur = config.conn.cursor()
-        sqlQuery = "SELECT Numeral FROM " + table_name + " ORDER BY Numeral DESC LIMIT 1"
+        sqlQuery = "SELECT job FROM " + table_name + " ORDER BY job DESC LIMIT 1"
         cur.execute(sqlQuery)
         try:
             numeral = cur.fetchone()[0]
@@ -324,38 +365,60 @@ class BookForm(npyscreen.FormBaseNew):
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
         form.reload()   # reloading chooser fields, etc in case we've changed the other tables
         form.current_option = "Create"
-        form.numeralFld.editable = True
-        form.numeralFld.maximum_string_length = 6
-        form.numeralFld.value = str(form.get_last_numeral(DBTABLENAME) + 1)
-        form.bookTitleFld.editable = True
-        form.bookTitleFld.value = ""
-        form.originalTitleFld.editable = True
-        form.originalTitleFld.value = ""
-        form.authorFld.editable = True
-        form.authorFld.value = ""
-        form.descriptionFld.editable = True
-        form.descriptionFld.value = ""
-        form.isbnFld.editable = True
-        form.isbnFld.value = ""
-        form.yearFld.editable = True
-        form.yearFld.value = ""
-        form.publisherFld.editable = True
-        form.publisherFld.value = ""
+        form.jobFld.editable = True
+        form.jobFld.maximum_string_length = 6
+        form.jobFld.value = str(form.get_last_job(DBTABLENAME) + 1)
+
+#        form.bookTitleFld.editable = True
+#        form.bookTitleFld.value = ""
+        
+#        form.originalTitleFld.editable = True
+#        form.originalTitleFld.value = ""
+        
+        form.patientFld.editable = True
+        form.patientFld.value = ""
+
+        form.vendorFld.editable = True
+        form.vendorFld.value = ""
+
+        form.labFld.editable = True
+        form.labFld.value = ""
+        
+#        form.descriptionFld.editable = True
+#        form.descriptionFld.value = ""
+        
+#        form.isbnFld.editable = True
+#        form.isbnFld.value = ""
+        
+#        form.yearFld.editable = True
+#        form.yearFld.value = ""
+        
+#        form.publisherFld.editable = True
+#        form.publisherFld.value = ""
+        
         form.creationDateFld.editable = True
         form.creationDateFld.value = form.selectorForm.today
-        form.genreFld.editable = True
-        form.genreFld.value = ""
-        form.coverTypeFld.editable = True
-        form.coverTypeFld.value = ""
-        form.warehousesFld.editable = True
-        form.warehousesFld.value = ""
+        
+#        form.genreFld.editable = True
+#        form.genreFld.value = ""
+        
+#        form.coverTypeFld.editable = True
+#        form.coverTypeFld.value = ""
+        
+#        form.warehousesFld.editable = True
+#        form.warehousesFld.value = ""
+        
         form.priceFld.editable = True
         form.priceFld.value = ""
         form.priceFld.maximum_string_length = 8
+        
         form.ok_button.when_pressed_function = form.createOKbtn_function
         form.ok_button.name = "Save"  # name changes between calls
+        
         form.cancel_button.when_pressed_function = form.createCancelbtn_function
+        
         form.statusLine.value = "Creating a new record"
+        
         form.backup_fields()
         form.editw = form.get_editw_number("Title:")
         config.last_operation = "Create"
@@ -365,10 +428,10 @@ class BookForm(npyscreen.FormBaseNew):
         global form
         form.current_option = "Read"
         form.convertDBtoFields()
-        form.numeralFld.editable = False
+        form.jobFld.editable = False
         form.bookTitleFld.editable = False
         form.originalTitleFld.editable = False
-        form.authorFld.editable = False
+        form.patientFld.editable = False
         form.descriptionFld.editable = False
         form.isbnFld.editable = False
         form.yearFld.editable = False
@@ -395,11 +458,11 @@ class BookForm(npyscreen.FormBaseNew):
         form.reload()   # reloading chooser fields, etc in case we've changed other tables
         form.current_option = "Update"
         form.convertDBtoFields()
-        form.numeralFld.editable = True
-        form.numeralFld.maximum_string_length = 6
+        form.jobFld.editable = True
+        form.jobFld.maximum_string_length = 6
         form.bookTitleFld.editable = True
         form.originalTitleFld.editable = True
-        form.authorFld.editable = True
+        form.patientFld.editable = True
         form.descriptionFld.editable = True
         form.isbnFld.editable = True
         form.isbnFld.maximum_string_length = 17     # Four hyphens included
@@ -429,10 +492,10 @@ class BookForm(npyscreen.FormBaseNew):
         conn.execute('BEGIN EXCLUSIVE TRANSACTION')     # exclusive access starts here. Nothing else can r/w the DB.
         form.current_option = "Delete"
         form.convertDBtoFields()
-        form.numeralFld.editable = False
+        form.jobFld.editable = False
         form.bookTitleFld.editable = False
         form.originalTitleFld.editable = False
-        form.authorFld.editable = False
+        form.patientFld.editable = False
         form.descriptionFld.editable = False
         form.isbnFld.editable = False
         form.yearFld.editable = False
@@ -452,10 +515,10 @@ class BookForm(npyscreen.FormBaseNew):
 
     def convertDBtoFields(self):
         "Convert DB fields into screen fields (strings)."
-        self.numeralFld.value = str(config.fileRow[1])
+        self.jobFld.value = str(config.fileRow[1])
         self.bookTitleFld.value = config.fileRow[2]
         self.originalTitleFld.value = config.fileRow[3]
-        self.authorFld.value = self.selectorForm.get_author_name(config.fileRow[1])
+        self.patientFld.value = self.selectorForm.get_author_name(config.fileRow[1])
         self.descriptionFld.value = config.fileRow[5]
         self.isbnFld.value = config.fileRow[6]
         self.yearFld.value = str(config.fileRow[7])
@@ -470,10 +533,10 @@ class BookForm(npyscreen.FormBaseNew):
 
     def strip_fields(self):
         "Required trimming of leading and trailing spaces."
-        self.numeralFld.value = self.numeralFld.value.strip()
+        self.jobFld.value = self.jobFld.value.strip()
         self.bookTitleFld.value = self.bookTitleFld.value.strip()
         self.originalTitleFld.value = self.originalTitleFld.value.strip()
-        self.authorFld.value = self.authorFld.value.strip()
+        self.patientFld.value = self.patientFld.value.strip()
         self.descriptionFld.value = self.descriptionFld.value.strip()
         self.isbnFld.value = self.isbnFld.value.strip()
         self.yearFld.value = self.yearFld.value.strip()
@@ -487,10 +550,10 @@ class BookForm(npyscreen.FormBaseNew):
         "Save new record (from Create) to global variable."
         config.fileRow = []
         config.fileRow.append(None)    # ID field is incremental, fulfilled later
-        config.fileRow.append(int(self.numeralFld.value))
+        config.fileRow.append(int(self.jobFld.value))
         config.fileRow.append(self.bookTitleFld.value)
         config.fileRow.append(self.originalTitleFld.value)
-        config.fileRow.append(self.authorFld.value)
+        config.fileRow.append(self.patientFld.value)
         config.fileRow.append(self.descriptionFld.value)
         config.fileRow.append(self.isbnFld.value)
         config.fileRow.append(int(self.yearFld.value))
@@ -516,9 +579,9 @@ class BookForm(npyscreen.FormBaseNew):
             if self.exist_changes():
                 self.save_mem_record()  # backup record in config variable
                 self.save_created_book()
-                self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.jobFld.value))
             else:
-                self.exitBook(modified=False)
+                self.exitRxOrder(modified=False)
 
     def createCancelbtn_function(self):
         "Cancel button function under Create mode."
@@ -526,19 +589,19 @@ class BookForm(npyscreen.FormBaseNew):
         if self.exist_changes():
             message = "\n      Discard creation?"
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                self.exitBook(modified=False)
+                self.exitRxOrder(modified=False)
         else:
-            self.exitBook(modified=False)
+            self.exitRxOrder(modified=False)
    
     def readOnlyOKbtn_function(self):
         "OK button function under Read mode."
-        self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
-        self.exitBook(modified=False)
+        self.selectorForm.grid.set_highlight_row(int(self.jobFld.value))
+        self.exitRxOrder(modified=False)
 
     def readOnlyCancelbtn_function(self):
         "Cancel button function under Read mode."
-        self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
-        self.exitBook(modified=False)
+        self.selectorForm.grid.set_highlight_row(int(self.jobFld.value))
+        self.exitRxOrder(modified=False)
 
     def delete_book(self):
         "Button based Delete function for D=Delete."
@@ -579,7 +642,7 @@ class BookForm(npyscreen.FormBaseNew):
         cur.execute(sqlQuery)
         conn.commit()
 
-        self.exitBook(modified=True)
+        self.exitRxOrder(modified=True)
 
     def deleteOKbtn_function(self):
         "OK button function under Delete mode."
@@ -593,13 +656,13 @@ class BookForm(npyscreen.FormBaseNew):
                 numeral = None
             self.selectorForm.grid.set_highlight_row(numeral)
         else:
-            self.exitBook(modified=False)
+            self.exitRxOrder(modified=False)
 
     def deleteCancelbtn_function(self):
         "Cancel button function under Delete mode."
         bs.notify("\n   Record was NOT deleted", title="Message", form_color='STANDOUT', wrap=True, wide=False)
         time.sleep(0.4)     # let it be seen
-        self.exitBook(modified=False)
+        self.exitRxOrder(modified=False)
 
     def while_editing(self, *args, **keywords):
         "Executes in between fields."
@@ -617,13 +680,13 @@ class BookForm(npyscreen.FormBaseNew):
 
         # Mandatory values check:
         emptyField = False
-        if self.numeralFld.value == "":
+        if self.jobFld.value == "":
             emptyField = True
             self.editw = self.get_editw_number("Numeral:") - 1
         elif self.bookTitleFld.value == "":  
             emptyField = True
             self.editw = self.get_editw_number("Title:") - 1
-        elif self.authorFld.value == "":  
+        elif self.patientFld.value == "":  
             emptyField = True
             self.editw = self.get_editw_number("Author:") - 1
         elif self.isbnFld.value == "":  
@@ -654,13 +717,13 @@ class BookForm(npyscreen.FormBaseNew):
         
         # wrong value check: numeral field
         try:
-            a = int(self.numeralFld.value)
+            a = int(self.jobFld.value)
         except ValueError:
             self.editw = self.get_editw_number("Numeral:") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Numeral must be integer"
             return errorMsg
-        if len(self.numeralFld.value) > self.numeralFld.maximum_string_length:
+        if len(self.jobFld.value) > self.jobFld.maximum_string_length:
             self.editw = self.get_editw_number("Numeral:") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Numeral maximum length exceeded"
@@ -696,11 +759,11 @@ class BookForm(npyscreen.FormBaseNew):
             return errorMsg
 
         # repeated value check: numeral and isbn fields
-        if self.numeralFld.value != self.bu_numeral or self.isbnFld.value != self.bu_isbn:
+        if self.jobFld.value != self.bu_job or self.isbnFld.value != self.bu_isbn:
             for row in config.fileRows:
                 self.ok_button.editing = False
                 # Already exists and it's not itself
-                if row[1] == int(self.numeralFld.value) and self.numeralFld.value != self.bu_numeral:
+                if row[1] == int(self.jobFld.value) and self.jobFld.value != self.bu_job:
                     self.editw = self.get_editw_number("Numeral:") - 1
                     errorMsg = "Error:  Numeral already exists"
                     return errorMsg
@@ -713,10 +776,10 @@ class BookForm(npyscreen.FormBaseNew):
     def exist_changes(self):
         "Checking for changes to the fields."
         exist_changes = False
-        if self.numeralFld.value != self.bu_numeral or \
+        if self.jobFld.value != self.bu_job or \
             self.bookTitleFld.value != self.bu_bookTitle or \
             self.originalTitleFld.value != self.bu_originalTitle or \
-            self.authorFld.value != self.bu_author or \
+            self.patientFld.value != self.bu_patient or \
             self.descriptionFld.value != self.bu_description or \
             self.isbnFld.value != self.bu_isbn or \
             self.yearFld.value != self.bu_year or \
@@ -745,7 +808,7 @@ class BookForm(npyscreen.FormBaseNew):
         message = "\n  Publisher was not found. Create it as a new one?"
         if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
             return None
-        num = self.get_last_numeral("'bookstore.publisher'") + 1
+        num = self.get_last_mrn("'bookstore.publisher'") + 1
         conn = config.conn
         cur = conn.cursor()
         sqlQuery = "INSERT INTO 'bookstore.publisher' (numeral,name,address,phone,url) VALUES (?,?,?,?,?)"
@@ -760,18 +823,18 @@ class BookForm(npyscreen.FormBaseNew):
 
         conn = config.conn
         cur = conn.cursor()
-        # Check if author exists, to create intermediate book_author table:
+        # Check if patient exists, to create intermediate book_author table:
         try:
-            sqlQuery = "SELECT id, numeral, name FROM 'bookstore.author' WHERE name=?"
-            cur.execute(sqlQuery, (self.authorFld.value,) )
+            sqlQuery = "SELECT id, mrn, name FROM 'optidrome.patient' WHERE name=?"
+            cur.execute(sqlQuery, (self.patientFld.value,) )
             row = cur.fetchone()
-            self.author_numeral = row[1]
+            self.patient_mrn = row[1]
         except TypeError:   # author does not exist
             message = "\n   Author was not found. Create it as a new one?"
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                self.author_numeral = self.get_last_numeral("'bookstore.author'") + 1
-                sqlQuery = "INSERT INTO 'bookstore.author' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
-                values = (int(self.author_numeral), self.authorFld.value, "", "", "")  # some fields are filled empty
+                self.patient_mrn = self.get_last_mrn("'optidrome.patient'") + 1
+                sqlQuery = "INSERT INTO 'optidrome.patient' (mrn, name, dob, phone, email) VALUES (?,?,?,?,?)"
+                values = (int(self.patient_mrn), self.patientFld.value, "", "", "")  # some fields are filled empty
                 cur.execute(sqlQuery, values)
                 conn.commit()
                 bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
@@ -781,7 +844,7 @@ class BookForm(npyscreen.FormBaseNew):
 
         # creation of book_author intermediate table
         sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
-        values = (int(self.numeralFld.value), int(self.author_numeral), 1)
+        values = (int(self.jobFld.value), int(self.patient_mrn), 1)
         cur.execute(sqlQuery, values)
         conn.commit()
         conn.isolation_level = None     # free the multiuser lock
@@ -798,7 +861,7 @@ class BookForm(npyscreen.FormBaseNew):
         price = float(Decimal(price))
         columns = " (numeral,book_title,original_title,description,isbn,year,publisher_num,creation_date,genre_id,cover_type,price) "
         sqlQuery = "INSERT INTO " + DBTABLENAME + columns + " VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-        values = (int(self.numeralFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, \
+        values = (int(self.jobFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, \
             self.isbnFld.value, int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price)
         cur.execute(sqlQuery, values)
         conn.commit()
@@ -819,11 +882,11 @@ class BookForm(npyscreen.FormBaseNew):
                     warehouse_num = row[0]  # jumps to except if does not exist
                     # Create the book_warehouse if it doesn't exist:
                     sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
-                    cur.execute(sqlQuery, (self.numeralFld.value, str(warehouse_num),) )
+                    cur.execute(sqlQuery, (self.jobFld.value, str(warehouse_num),) )
                     row = cur.fetchone()
                     if row == None:   # book_warehouse does not exist, create it
                         sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
-                        values = (int(self.numeralFld.value), int(warehouse_num), None, None)
+                        values = (int(self.jobFld.value), int(warehouse_num), None, None)
                         cur.execute(sqlQuery, values)
                         conn.commit()
                 except TypeError:   # warehouse does not exist, we don't create it at this point.
@@ -834,10 +897,10 @@ class BookForm(npyscreen.FormBaseNew):
         # update config.fileRows:
         new_record = []
         new_record.append(config.fileRow[0])
-        new_record.append(int(self.numeralFld.value))
+        new_record.append(int(self.jobFld.value))
         new_record.append(self.bookTitleFld.value)
         new_record.append(self.originalTitleFld.value)
-        new_record.append(self.authorFld.value)
+        new_record.append(self.patientFld.value)
         new_record.append(self.descriptionFld.value)
         new_record.append(self.isbnFld.value)
         new_record.append(self.yearFld.value)
@@ -847,7 +910,7 @@ class BookForm(npyscreen.FormBaseNew):
         new_record.append(self.coverTypeFld.value)
         new_record.append(Decimal(price))
         config.fileRows.append(new_record)
-        self.exitBook(modified=True)
+        self.exitRxOrder(modified=True)
 
     def save_updated_book(self):
         "Button based Save function for U=Update."
@@ -856,11 +919,11 @@ class BookForm(npyscreen.FormBaseNew):
         cur = conn.cursor()
 
         # if numeral has changed (already checked for non-existence), update book_author and book_warehouse intermediate tables
-        if self.numeralFld.value != self.bu_numeral:
+        if self.jobFld.value != self.bu_job:
 
             columns = "book_num=?"
-            new_numeral = int(self.numeralFld.value)
-            old_numeral = int(self.bu_numeral)
+            new_numeral = int(self.jobFld.value)
+            old_numeral = int(self.bu_job)
             sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
             values = (new_numeral, old_numeral)
             try:
@@ -876,18 +939,18 @@ class BookForm(npyscreen.FormBaseNew):
             conn.commit()
 
         # Check if author has changed, and if exists, to update intermediate book_author table
-        if self.authorFld.value != self.bu_author:
+        if self.patientFld.value != self.bu_patient:
             try:
                 sqlQuery = "SELECT id, numeral, name FROM 'bookstore.author' WHERE name=?"
-                cur.execute(sqlQuery, (self.authorFld.value,) )
+                cur.execute(sqlQuery, (self.patientFld.value,) )
                 row = cur.fetchone()
-                self.author_numeral = row[1]
+                self.patient_mrn = row[1]
             except TypeError:   # author does not exist
                 message = "\n   Author was not found. Create it as a new one?"
                 if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                    self.author_numeral = self.get_last_numeral("'bookstore.author'") + 1
+                    self.patient_mrn = self.get_last_mrn("'bookstore.author'") + 1
                     sqlQuery = "INSERT INTO 'bookstore.author' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
-                    values = (self.author_numeral, self.authorFld.value, "", "", "")  # some fields are filled empty
+                    values = (self.patient_mrn, self.patientFld.value, "", "", "")  # some fields are filled empty
                     cur.execute(sqlQuery, values)
                     conn.commit()
                     bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
@@ -897,17 +960,17 @@ class BookForm(npyscreen.FormBaseNew):
             # update of book_author intermediate table
             try:
                 columns = "book_num=?, author_num=?, is_main_author=?"
-                if self.numeralFld.value == self.bu_numeral:
-                    numeral = int(self.numeralFld.value)
+                if self.jobFld.value == self.bu_job:
+                    numeral = int(self.jobFld.value)
                 else:
-                    numeral = int(self.bu_numeral)
+                    numeral = int(self.bu_job)
                 sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
-                values = (numeral, self.author_numeral, 1, numeral)
+                values = (numeral, self.patient_mrn, 1, numeral)
                 cur.execute(sqlQuery, values)
                 conn.commit()
             except TypeError:   # book_author does not exist, create it
                 sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
-                values = (int(self.numeralFld.value), self.author_numeral, 1)
+                values = (int(self.jobFld.value), self.patient_mrn, 1)
                 cur.execute(sqlQuery, values)
                 conn.commit()
 
@@ -933,11 +996,11 @@ class BookForm(npyscreen.FormBaseNew):
                     warehouse_num = row[0]  # jumps to except if does not exist
                     # Create the book_warehouse if it doesn't exist:
                     sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
-                    cur.execute(sqlQuery, (self.numeralFld.value, str(warehouse_num),) )
+                    cur.execute(sqlQuery, (self.jobFld.value, str(warehouse_num),) )
                     row = cur.fetchone()
                     if row == None:   # book_warehouse does not exist, create it
                         sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
-                        values = (int(self.numeralFld.value), int(warehouse_num), None, None)
+                        values = (int(self.jobFld.value), int(warehouse_num), None, None)
                         cur.execute(sqlQuery, values)
                         conn.commit()
                 except TypeError:   # warehouse does not exist, we don't create it at this point.
@@ -960,7 +1023,7 @@ class BookForm(npyscreen.FormBaseNew):
                     sqlQuery = "SELECT numeral FROM 'bookstore.warehouse' WHERE code=?"
                     cur.execute(sqlQuery, (wh,) )
                     row = cur.fetchone()                                        
-                    book_num = self.numeralFld.value
+                    book_num = self.jobFld.value
                     warehouse_num = str(row[0])
                     cur.execute("DELETE FROM 'bookstore.book_warehouse' WHERE book_num="+book_num+" AND warehouse_num="+warehouse_num)
                     conn.commit()
@@ -971,12 +1034,12 @@ class BookForm(npyscreen.FormBaseNew):
         price = float(Decimal(price))
         columns = "numeral=?, book_title=?, original_title=?, description=?, isbn=?, year=?, publisher_num=?, creation_date=?, genre_id=?, cover_type=?, price=?"
         sqlQuery = "UPDATE " + DBTABLENAME + " SET " + columns + " WHERE id=?"
-        values = (int(self.numeralFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, self.isbnFld.value, \
+        values = (int(self.jobFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, self.isbnFld.value, \
             int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price, config.fileRow[0])
         cur.execute(sqlQuery, values)
         conn.commit()
         bs.notify("\n       Record saved", title="Message", form_color='STANDOUT', wrap=True, wide=False)
-        self.exitBook(modified=True)
+        self.exitRxOrder(modified=True)
 
     def updateOKbtn_function(self):
         "OK button function under Update mode."
@@ -988,10 +1051,10 @@ class BookForm(npyscreen.FormBaseNew):
         else:
             if self.exist_changes():
                 self.save_updated_book()
-                self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
+                self.selectorForm.grid.set_highlight_row(int(self.jobFld.value))
             else:
-                self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
-                self.exitBook(modified=False)
+                self.selectorForm.grid.set_highlight_row(int(self.jobFld.value))
+                self.exitRxOrder(modified=False)
 
     def updateCancelbtn_function(self):
         "Cancel button function under Update mode."
@@ -999,10 +1062,10 @@ class BookForm(npyscreen.FormBaseNew):
         if self.exist_changes():
             message = "\n      Discard changes?"
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                self.exitBook(modified=False)
+                self.exitRxOrder(modified=False)
         else:
-            self.selectorForm.grid.set_highlight_row(int(self.numeralFld.value))
-            self.exitBook(modified=False)
+            self.selectorForm.grid.set_highlight_row(int(self.jobFld.value))
+            self.exitRxOrder(modified=False)
 
     def screenToDBDate(self, screenDate, screenFormat):
         "Converts a simple screen date to a DB timestamp"
@@ -1162,7 +1225,7 @@ class BookForm(npyscreen.FormBaseNew):
         "Hooked from bs.MyPopup.__init__()"
         parentField = None
         if widget.name == "Author:" :
-            parentField = self.authorFld
+            parentField = self.patientFld
         elif widget.name == "Publisher:" :
             parentField = self.publisherFld
         elif widget.name == "Warehouses:" :

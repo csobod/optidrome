@@ -29,14 +29,14 @@ import numpy
 
 import bsWidgets as bs
 import config
-from rxorder import BookForm
+from rxorder import RxOrderForm
 from config import SCREENWIDTH as WIDTH
 
 REMEMBER_ROW = True    # remember the last row selected when coming from main menu
 REMEMBER_SUBSET = config.REMEMBER_SUBSET  # remember the last 'Find' result subset
 DATEFORMAT = config.dateFormat  # program-wide
-FIELD_LIST = ["numeral","title","author","year","publisher","date","isbn"]  # only screen fields, not DB
-DBTABLENAME = "'bookstore.book'"
+FIELD_LIST = ["job", "patient", "creation_date", "status", "balance"] # only screen fields, not DB
+DBTABLENAME = "'optidrome.rxorder'"
 
 helpText =  "The book selector is a grid of database table rows (records).\n\n" +\
     "* Use the arrow keys, Page Up/Down and Home/End to navigate the grid.\n\n" +\
@@ -55,7 +55,7 @@ helpText =  "The book selector is a grid of database table rows (records).\n\n" 
     "By default, the record grid 'remembers' the result of the last search. This behaviour can be changed by variable. "    
 
 
-class BookSelectForm(npyscreen.FormBaseNew):
+class RxOrderSelectForm(npyscreen.FormBaseNew):
     "Book selector and FCRUD options."
     def __init__(self, name="", parentApp=None, framed=None, help=None, color='FORMDEFAULT', widget_list=None, \
         cycle_widgets=True, *args, **keywords):
@@ -70,22 +70,22 @@ class BookSelectForm(npyscreen.FormBaseNew):
     def create(self):
         "The standard constructor will call the method .create(), which you should override to create the Form widgets."
         self.framed = False   # frameless form
-        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exitBookSelector   # Escape exit
+        self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exitRxOrderSelector   # Escape exit
         
         # Form title - Screen title line
         pname, version = config.pname, config.program_version
-        self.form_title = pname + " " + version + " - Book selector"
+        self.form_title = pname + " " + version + " - Order selector"
         self.today = self.get_today()
-        self.formTitle=self.add(bs.MyTextfield, name="BookTitle", value=None, relx=0, rely=0, \
+        self.formTitle=self.add(bs.MyTextfield, name="RxOrderTitle", value=None, relx=0, rely=0, \
             use_max_space=True, width=WIDTH, max_width=WIDTH, maximum_string_length=WIDTH, editable=False)
         
         # Books grid
-        self.grid = bs.MyGrid(screen=self, name="BookGrid")      # (All attributes are set later)
+        self.grid = bs.MyGrid(screen=self, name="RxOrderGrid")      # (All attributes are set later)
         self.grid.editing=True
         self.columnTitles = ["Numeral","      Title","  Author","Year","  Publisher"," Date","  ISBN/SKU"]
         self.col_widths = [8, 29, 24, 5, 14, 9, 71]  # first (left) screen fields must add up to WIDTH
         
-        self.grid = self.add(self.grid.__class__, name="BookGrid", col_titles=self.columnTitles, col_widths=self.col_widths, \
+        self.grid = self.add(self.grid.__class__, name="RxOrderGrid", col_titles=self.columnTitles, col_widths=self.col_widths, \
                 relx=0, rely=1, height=22, width=WIDTH, min_height=22, min_width=WIDTH, editable=True, hidden=False, \
                 values=None, select_whole_line=True, always_show_cursor=True, column_width=13)
         
@@ -104,7 +104,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
         self.inputOpt.check_value_change=True
 
         # Detail input field for 6-digit numeral, and also for Find-literal
-        self.inputDetail = self.add(bs.DetailField, screenForm=BookForm, name='DetailFld', value="", relx=26, rely=24,
+        self.inputDetail = self.add(bs.DetailField, screenForm=RxOrderForm, name='DetailFld', value="", relx=26, rely=24,
                                         width=8, height=0, max_width=8, max_height=0, 
                                         editable=True, hidden=True, use_max_space=True)
         
@@ -142,7 +142,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
         cur = config.conn.cursor()
         while True:     # multiuser DB locking loop
             try:
-                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY numeral")
+                cur.execute("SELECT * FROM " + DBTABLENAME + " ORDER BY job")
                 break   # go on
             except sqlite3.OperationalError:
                 bs.notify_OK("\n    Database is locked, please wait.", "Message")
@@ -152,12 +152,12 @@ class BookSelectForm(npyscreen.FormBaseNew):
             id = row[0]
             numeral = row[1]
             bookTitle = row[2]
-            author = self.get_author_name(numeral)
+            patient = self.get_patient_name(numeral)
             year = row[6]
             publisher = self.get_publisher_name(row[7])
             date = self.DBtoScreenDate(row[8], DATEFORMAT)   # = creation date
             isbn = row[5]
-            cRow = [id, numeral, bookTitle, author, year, publisher, date, isbn]
+            cRow = [id, numeral, bookTitle, patient, year, publisher, date, isbn]
             rows.append(cRow)    # included book.id
         self.set_up_title(filerows, full_set=True)
         return rows # it's a list of lists
@@ -186,7 +186,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
                     for row in config.fileRows:
                         if row[0] == config.fileRow[0]:     # ID field
                             row[1] = config.fileRow[1]      # Numeral
-                            row[2] = config.fileRow[2]      # BookTitle
+                            row[2] = config.fileRow[2]      # RxOrderTitle
                             row[3] = config.fileRow[4]      # Author
                             row[4] = config.fileRow[7]      # Year
                             row[5] = config.fileRow[8]      # Publisher
@@ -217,9 +217,9 @@ class BookSelectForm(npyscreen.FormBaseNew):
         self.grid.editing = False
         self.inputDetail.relx = 26 # just in case
         self.ask_option()  # for when we are back to this screen
-        config.parentApp.setNextForm("BOOK")
+        config.parentApp.setNextForm("RXORDER")
         config.parentApp.switchFormNow()
-        BookForm.set_createMode()
+        RxOrderForm.set_createMode()
 
     def read_row(self):
         "It's been keypressed R/r=Read."
@@ -394,7 +394,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
                 config.fileRow.append(filerow[2])   # book title
                 config.fileRow.append(filerow[3])   # original title
                 # filerow has no author value, it is found through intermediate table:
-                config.fileRow.append(self.get_author_name(filerow[1]))   # author
+                config.fileRow.append(self.get_patient_name(filerow[1]))   # author
                 config.fileRow.append(filerow[4])   # description
                 config.fileRow.append(filerow[5])   # isbn/sku
                 config.fileRow.append(filerow[6])   # year
@@ -421,7 +421,7 @@ class BookSelectForm(npyscreen.FormBaseNew):
         time.sleep(0.6)     # let it be seen
         return False    # not found
 
-    def exitBookSelector(self):
+    def exitRxOrderSelector(self):
         "Escape key was pressed: isinstance(self, BookSelectForm) = True; we always come from the OptionField."
         get_out = False
         if self.statusLine.value != self.optionsLiteral:    # it's not the option statusline; it's the detail field
@@ -558,23 +558,19 @@ class BookSelectForm(npyscreen.FormBaseNew):
                 bs.notify_OK("Find: Error in date literal", "Message")
                 return False
 
-        fieldStr = "'bookstore.book'.id, 'bookstore.book'.numeral, 'bookstore.book'.book_title, 'bookstore.author'.name, \
-            'bookstore.book'.year, 'bookstore.publisher'.name, 'bookstore.book'.creation_date, 'bookstore.book'.isbn"
+        fieldStr = "'optidrome.rxorder'.id, 'optidrome.rxorder'.job, 'optidrome.patient'.name, \
+            'optidrome.rxorder'.creation_date, 'bookstore.book'.isbn"
         sqlQuery = "SELECT " + fieldStr + " FROM " + DBTABLENAME + \
-            " INNER JOIN 'bookstore.book_author' ON 'bookstore.book_author'.book_num = 'bookstore.book'.numeral " + \
-            " INNER JOIN 'bookstore.author' ON 'bookstore.author'.numeral = 'bookstore.book_author'.author_num " + \
-            " INNER JOIN 'bookstore.publisher' ON 'bookstore.publisher'.numeral = 'bookstore.book'.publisher_num "
+            " INNER JOIN 'optidrome.patient' ON 'optidrome.patient'.id = 'optidrome.prescription'.patient_mrn "
             
         if field == "numeral":
-            field = "'bookstore.book'.numeral"
+            field = "'optidrome.rxorder'.job"
         elif field == "title":
             field = "book_title"
-        elif field == "author":
-            field = "'bookstore.author'.name"
-        elif field == "publisher":
-            field = "'bookstore.publisher'.name"
+        elif field == "patient":
+            field = "'optidrome.patient'.name"
         elif field == "date":
-            field = "'bookstore.book'.creation_date"
+            field = "'optidrome.rxorder'.creation_date"
 
         if not comparator:
             if field == False:  # no field specified, so search all fields
@@ -582,27 +578,24 @@ class BookSelectForm(npyscreen.FormBaseNew):
                 if date_literal:
                     if date_literal in "00:00:00.000":
                         date_literal = "X"   # to not find it
-                    whereStr = "WHERE 'bookstore.book'.creation_date LIKE ?" \
-                        " COLLATE NOCASE ORDER BY 'bookstore.book'.numeral"
+                    whereStr = "WHERE 'optidrome.rxorder'.creation_date LIKE ?" \
+                        " COLLATE NOCASE ORDER BY 'optidrome.rxorder'.job"
                     literal = date_literal
                 else:
-                    whereStr = "WHERE 'bookstore.book'.numeral LIKE ?" \
-                        " OR 'bookstore.book'.book_title LIKE ?" \
-                        " OR 'bookstore.author'.name LIKE ?" \
-                        " OR 'bookstore.book'.year LIKE ?" \
-                        " OR 'bookstore.publisher'.name LIKE ?" \
-                        " OR 'bookstore.book'.creation_date LIKE ?" \
+                    whereStr = "WHERE 'optidrome.rxorder'.job LIKE ?" \
+                        " OR 'optidrome.patient'.name LIKE ?" \
+                        " OR 'optidrome.rxorder'.creation_date LIKE ?" \
                         " OR 'bookstore.book'.isbn LIKE ?" \
-                        " COLLATE NOCASE ORDER BY 'bookstore.book'.numeral"
+                        " COLLATE NOCASE ORDER BY 'optidrome.rxorder'.job"
             else:   # field != False
                 if date_literal:
                     literal = date_literal
-                whereStr = "WHERE " + field + " LIKE ? COLLATE NOCASE ORDER BY 'bookstore.book'.numeral"
+                whereStr = "WHERE " + field + " LIKE ? COLLATE NOCASE ORDER BY 'optidrome.rxorder'.job"
 
         elif comparator:
             if date_literal:
                 literal = date_literal
-            whereStr = "WHERE " + field + " " + comparator + " ? COLLATE NOCASE ORDER BY 'bookstore.book'.numeral"
+            whereStr = "WHERE " + field + " " + comparator + " ? COLLATE NOCASE ORDER BY 'optidrome.rxorder'.job"
 
         sqlQuery += whereStr
         
@@ -630,12 +623,12 @@ class BookSelectForm(npyscreen.FormBaseNew):
             id = row[0]
             numeral = row[1]
             title = row[2]
-            author = row[3]
+            patient = row[3]
             year = str(row[4])
             publisher = row[5]
             date = self.DBtoScreenDate(row[6], DATEFORMAT)  # = creation date
             isbn = row[7]
-            cRow = [id, numeral, title, author, year, publisher, date, isbn]
+            cRow = [id, numeral, title, patient, year, publisher, date, isbn]
             rows.append(cRow)
         config.fileRows = rows
         self.screenFileRows = self.getRowListForScreen(config.fileRows)     # it's a list of lists
@@ -664,36 +657,21 @@ class BookSelectForm(npyscreen.FormBaseNew):
         screenDate = screenDate + year
         return screenDate
 
-    def get_author_name(self, book_num):
-        "Returns author name."
+    def get_patient_name(self, publisher_num):
+        "Returns patient name."
         cur = config.conn.cursor()
-        sqlQuery = "SELECT * FROM 'bookstore.book_author' WHERE book_num=?"
+        sqlQuery = "SELECT name FROM 'optidrome.patient' WHERE mrn=?"
         try:
-            cur.execute( sqlQuery, (str(book_num),) )
+            cur.execute(sqlQuery, (str(publisher_num),) )
         except sqlite3.Error as e:
             bs.notify_OK("\n    sqlite3.Error: \n"+str(e),"Message", form_color='STANDOUT', wrap=True, wide=False)
             return "DB Error"            
-        filerows = cur.fetchall()
-        if len(filerows) == 0:
-            bs.notify("\n    Author/book relationship was not found","Message", form_color='STANDOUT', wrap=True, wide=False)
+        filerows = cur.fetchone()
+        if filerows == None:
+            bs.notify("\n    Publisher was not found","Message", form_color='STANDOUT', wrap=True, wide=False)
             return "Not found"
-        for row in filerows:
-            is_main_author = row[3]
-            if is_main_author:  # = is main author
-                author_num = row[2]
-                sqlQuery = "SELECT * FROM 'bookstore.author' WHERE numeral=?"
-                try:
-                    cur.execute( sqlQuery, (str(author_num),) )
-                except sqlite3.Error as e:
-                    bs.notify_OK("\n    sqlite3.Error: \n"+str(e),"Message", form_color='STANDOUT', wrap=True, wide=False)
-                    return "DB Error"
-                filerow = cur.fetchone()
-                if filerow == None:
-                    bs.notify("\n    Author was not found","Message", form_color='STANDOUT', wrap=True, wide=False)
-                    return "Not found"
-                author_name = filerow[2]
-                return author_name
-        return "Not found"
+        else:
+            return filerows[0]
 
     def get_publisher_name(self, publisher_num):
         "Returns publisher name."
@@ -713,5 +691,5 @@ class BookSelectForm(npyscreen.FormBaseNew):
 
     def textfield_exit(self):
         "Exit from Detail field with Escape"
-        self.exitBookSelector()
+        self.exitRxOrderSelector()
         #pass    # do nothing = don't exit

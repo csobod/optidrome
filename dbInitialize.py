@@ -73,6 +73,29 @@ def create_user(conn):
         print(e)
 
 
+def create_patient(conn):
+    """
+    Create a new patient into the patient table
+    :param conn:
+    :param patient:
+    :return: patient id
+    """
+    try:
+        mrn = 1
+        name = 'John Doe'
+        dob = '1970-01-01'
+        phone = '123-456-7890'
+        email = 'johndoe@notmail.co'
+        address = '123 Main St'
+        notes = 'None'
+        patient_data = [(mrn, name, dob, phone, email, address, notes)]
+        c = conn.cursor()
+        c.executemany('INSERT INTO "optidrome.patient" (mrn,name,dob,phone,email,address,notes) VALUES (?,?,?,?,?,?,?) ', patient_data)
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
 def main():
 
     sql_create_user_table = """
@@ -93,11 +116,40 @@ def main():
         "mrn"   INTEGER NOT NULL UNIQUE,
         "name"  TEXT NOT NULL,
         "dob"   TEXT NOT NULL,
-        "phone" TEXT NOT NULL CHECK (length(phone) >= 10),
+        "phone" TEXT NOT NULL CHECK (length("phone") >= 12),
         "email" TEXT NOT NULL UNIQUE,
         "address"   TEXT NOT NULL,
         "notes" TEXT,
         PRIMARY KEY("id")
+    ); """
+
+    sql_create_prescription_table = """
+    CREATE TABLE IF NOT EXISTS "optidrome.prescription" (
+        "id" INTEGER NOT NULL UNIQUE,
+        "rx_num" INTEGER NOT NULL UNIQUE,
+        "rxorder_job" INTEGER NOT NULL UNIQUE,
+        "patient_mrn" INTEGER NOT NULL,
+        "patient_name" TEXT NOT NULL,
+        "date" TEXT NOT NULL,
+        "expiration" TEXT NOT NULL,
+        "rx_type" TEXT NOT NULL,
+        "notes" TEXT,
+        "doctor" TEXT NOT NULL,
+        "doctor_phone" TEXT NOT NULL CHECK (length("rx_doctor_phone") >= 12),
+        "doctor_address" TEXT,
+        "rx_od_sph" REAL NOT NULL,
+        "rx_od_cyl" REAL NOT NULL,
+        "rx_od_axis" REAL NOT NULL,
+        "rx_od_add" REAL,
+        "rx_od_prism" TEXT,
+        "rx_os_sph" REAL NOT NULL,
+        "rx_os_cyl" REAL NOT NULL,
+        "rx_os_axis" REAL NOT NULL,
+        "rx_os_add" REAL,
+        PRIMARY KEY("id"),
+        FOREIGN KEY ("rxorder_job") REFERENCES "optidrome.rxorder"("job_num"),
+        FOREIGN KEY ("patient_mrn") REFERENCES "optidrome.patient"("mrn"),
+        FOREIGN KEY ("patient_name") REFERENCES "optidrome.patient"("name")
     ); """
 
     sql_create_vendor_table = """
@@ -110,6 +162,11 @@ def main():
         "fax" TEXT NOT NULL CHECK (length("fax") = 12),
         "email" TEXT NOT NULL UNIQUE,
         "website" TEXT NOT NULL,
+        "notes" TEXT,
+        "billing_address" TEXT NOT NULL,
+        "estimated_billing" REAL NOT NULL,
+        "billing_date" TEXT NOT NULL,
+        "billing_terms" TEXT NOT NULL,
         "is_lab" BOOLEAN NOT NULL,
         PRIMARY KEY("id")
     ); """
@@ -154,6 +211,7 @@ def main():
         "id" INTEGER NOT NULL UNIQUE,
         "job" INTEGER NOT NULL UNIQUE,
         "patient_mrn" INTEGER NOT NULL,
+        "patient_name" TEXT NOT NULL,
         "frame_id" INTEGER,
         "lens_id" INTEGER,
         "lens_color" TEXT NOT NULL,
@@ -167,6 +225,7 @@ def main():
         "origin_lab" TEXT NOT NULL,
         "invoice" INTEGER,
         "creation_date"	TEXT NOT NULL,
+        "iof" BOOLEAN NOT NULL,
         "order_status" INTEGER NOT NULL,
         "order_type" TEXT NOT NULL,
         "order_payment" TEXT NOT NULL,
@@ -175,13 +234,14 @@ def main():
         "order_paymentamount" REAL NOT NULL,
         "order_paymentmethod" TEXT NOT NULL,
         "order_paymentnotes" TEXT,
-        order_shipdate TEXT NOT NULL,
-        order_shipmethod TEXT NOT NULL,
-        order_shiptracking TEXT NOT NULL,
-        order_shipnotes TEXT,
+        "order_shipdate" TEXT NOT NULL,
+        "order_shipmethod" TEXT NOT NULL,
+        "order_shiptracking" TEXT NOT NULL,
+        "order_shipnotes" TEXT,
         "notes" TEXT,
         PRIMARY KEY("id"),
         FOREIGN KEY ("patient_mrn") REFERENCES "optidrome.patient"("mrn"),
+        FOREIGN KEY ("patient_name") REFERENCES "optidrome.patient"("name"),
         FOREIGN KEY ("frame_id") REFERENCES "optidrome.frame"("sku"),
         FOREIGN KEY ("lens_id") REFERENCES "optidrome.lens"("sku"),
         FOREIGN KEY ("origin_lab") REFERENCES "optidrome.lens"("origin_lab_num")
@@ -192,11 +252,13 @@ def main():
     if conn is not None:
         create_table(conn, sql_create_user_table)
         create_table(conn, sql_create_patient_table)
+        create_table(conn, sql_create_prescription_table)
         create_table(conn, sql_create_vendor_table)
         create_table(conn, sql_create_frame_table)
         create_table(conn, sql_create_lens_table)
         create_table(conn, sql_create_rxorder_table)
         create_user(conn)
+        create_patient(conn)
         conn.close()
     else:
         print("Error! cannot create the database connection.")

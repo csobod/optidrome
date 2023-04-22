@@ -23,8 +23,8 @@ from npyscreen import util_viewhelp
 
 import patient
 import patientSelector
-#import book
-#import bookListing
+import rxorder
+import rxorderSelector
 #import bookSelector
 import bsWidgets as bs
 
@@ -90,10 +90,10 @@ class optidromeApp(npyscreen.NPSAppManaged):
             lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH, maximum_columns=WIDTH))
         self.registerForm("IDENTIFICATION", identification.ID_Form(name="Identification", parentApp=self, \
             help=identification.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-#        self.registerForm("BOOKSELECTOR", bookSelector.BookSelectForm(name="BookSelector", parentApp=self, \
-#            help=bookSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
-#        self.registerForm("BOOK", book.BookForm(name="BookForm", parentApp=self, \
-#            help=book.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("RXORDERSELECTOR", rxorderSelector.RxOrderSelectForm(name="RxOrderSelector", parentApp=self, \
+            help=rxorderSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
+        self.registerForm("RXORDER", rxorder.RxOrderForm(name="RxOrderForm", parentApp=self, \
+            help=rxorder.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("PATIENTSELECTOR", patientSelector.PatientSelectForm(name="PatientSelector", parentApp=self, \
             help=patientSelector.helpText, lines=0, columns=0, minimum_lines=25, minimum_columns=WIDTH))
         self.registerForm("PATIENT", patient.PatientForm(name="PatientForm", parentApp=self, \
@@ -124,9 +124,9 @@ class optidromeApp(npyscreen.NPSAppManaged):
         if self.NEXT_ACTIVE_FORM == 'IDENTIFICATION':
             form = self._Forms["IDENTIFICATION"]
             form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
-#        elif self.NEXT_ACTIVE_FORM == 'BOOKSELECTOR':
-#            form = self._Forms["BOOKSELECTOR"]
-#            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
+        elif self.NEXT_ACTIVE_FORM == 'RXORDERSELECTOR':
+            form = self._Forms["RXORDERSELECTOR"]
+            form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
         elif self.NEXT_ACTIVE_FORM == 'PATIENTSELECTOR':
             form = self._Forms["PATIENTSELECTOR"]
             form.editw = 1  # focus to widget 1 (grid) so InputOpt field lose it.
@@ -245,7 +245,7 @@ class MainMenuForm(npyscreen.FormBaseNew):
                 self.selector.cursor_line=0
                 self.display()
                 time.sleep(0.2)
-                self.menuBookSelector()
+                self.menuRxOrderSelector()
             case 50:    # menu 2
                 self.selector.cursor_line=1
                 self.display()
@@ -277,12 +277,12 @@ class MainMenuForm(npyscreen.FormBaseNew):
                 time.sleep(0.2)
                 self.exitApplication()
 
-    def menuBookSelector(self):
+    def menuRxOrderSelector(self):
         # Calls books selector
-        selectorForm = self.parentApp._Forms['BOOKSELECTOR']
+        selectorForm = self.parentApp._Forms['RXORDERSELECTOR']
         selectorForm.update_grid()  # must be read here to get config.fileRows right
         selectorForm.ask_option()
-        self.app.switchForm("BOOKSELECTOR")
+        self.app.switchForm("RXORDERSELECTOR")
         
     def menuPatientSelector(self):
         # Calls authors selector
@@ -389,7 +389,7 @@ class VerticalMenu(bs.MyMultiLineAction):
         "Select by arrows + Enter key."
         form = self.parent
         if act_on_this[0] == "1":   # Book selector
-            form.menuBookSelector()
+            form.menuRxOrderSelector()
         elif act_on_this[0] == "2": # Author selector
             form.menuPatientSelector()
         elif act_on_this[0] == "3": # Publisher selector
