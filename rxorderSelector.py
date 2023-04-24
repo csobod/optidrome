@@ -565,8 +565,6 @@ class RxOrderSelectForm(npyscreen.FormBaseNew):
             
         if field == "numeral":
             field = "'optidrome.rxorder'.job"
-        elif field == "title":
-            field = "book_title"
         elif field == "patient":
             field = "'optidrome.patient'.name"
         elif field == "date":

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # encoding: utf-8
 ##############################################################################
-#     book.py - Book record form
+#     rxorder.py - RX Order record form
 #
 ##############################################################################
 # Copyright (c) 2022, 2023 David Villena
@@ -28,26 +28,38 @@ DBTABLENAME = "'optidrome.rxorder'"
 
 global form
 
-helpText =  "The book form is a typical record selector form.\n\n" +\
-    "* The text input fields, like 'Title' now accept most of the characters used in Western languages.\n\n" \
-    "* New autocomplete fields, like 'Author' are available. They are suffixed by a [+] mark. These fields " \
-    "are designed to accept a predefined range of values, and in the case of 'Author', it can also " \
-    "programmatically expand that range. The plus (+) key displays a popup list of values available. " \
-    "They can be stored in a list variable or they can be read from a DB table, as in this case. " \
-    "They can be automatically prefixed by a number or not, and they are 'called' into the input field " \
-    "by alphabetical elimination. Note the correct sorting of the accented names in the popup list.\n" \
-    "If you ask for the values list, you'll be warned to choose a correct value, but you can write a new " \
-    "one, i.e. a new author, and it will be added to the authors table. As the author is mandatory, " \
-    "you cannot leave it empty.\n\n" \
-    "* 'Public. year' is a year field that accepts the minus sign (to the left, thank you).\n\n" \
-    "* Both 'Genre' and 'Cover type' are autocomplete fields, filled by simply pressing a number. " \
-    "Internally, only the numerical value is stored in the database.\n\n" \
-    "* 'Warehouses' is an enumeration autocomplete field, it manages a comma-separated list of predefined values. " \
-    "The rationale of a book being in several warehouses is that you can have more than one copy.\n\n" \
+helpText = "the Rx Order form is a typical record selector form.\n\n" + \
+    "* Autocomplete fields, such as 'Patient' are available. They are suffixed by a [+] mark. " \
+    "These fields are designed to accept a predefined range of values, and in the case of 'Patient', " \
+    "it can also programmatically expand that range. The plus (+) key displays a popup list of values " \
+    "available. They can be stored in a list variable or they can be read from a DB table, as in this " \
+    "case. They can be automatically prefixed by a number or not, and they are 'called' into the input " \
+    "field by alphabetical elimination. Note the correct sorting of the accented names in the popup " \
+    "list.\n" \
+    "If you ask for the values list, you'll be warned to choose a correct value, but you can write a " \
+    "new one, i.e 'John Doe' and it will be stored in the database. If you want to add a new value " \
+    "to the list, you can do it by pressing the [+] key, and it will be added to the list and stored " \
+    "in the database.\n\n" \
+    "* The 'Date' field is a date selector. It can be used to select a date from a popup calendar, " \
+    "or you can type it in the format YYYY-MM-DD. The date is stored in the database as a string, " \
+    "but it is displayed in the format specified in the config.py file.\n\n" \
+    "* The 'Amount' field is a numeric field. It can be used to enter a numeric value, or you can " \
+    "use the up/down arrow keys to increase/decrease the value. The value is stored in the database " \
+    "as a string, but it is displayed in the format specified in the config.py file.\n\n" \
+    "* The 'Notes' field is a text field. It can be used to enter a text value, or you can use the " \
+    "up/down arrow keys to increase/decrease the value. The value is stored in the database as a " \
+    "string, but it is displayed in the format specified in the config.py file.\n\n" \
+    "* The 'Status' field is an enumeration field. It can be used to enter a value from a predefined " \
+    "list of values. The value is stored in the database as a string, but it is displayed in the " \
+    "format specified in the config.py file.\n\n" \
+    "* The 'Prescription' field is a file selector field. It can be used to select a file from the " \
+    "file system. The value is stored in the database as a string, but it is displayed in the format " \
+    "specified in the config.py file.\n\n" \
     "* 'Price' is a money field, designed to accept digits and point/comma."
 
 
 class RxOrderForm(npyscreen.FormBaseNew):
+
     "Order record on screen for maintenance."
     def __init__(self, name="RxOrder", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
         widget_list=None, cycle_widgets=False, ok_button_function=None, cancel_button_function=None, *args, **keywords):
@@ -76,8 +88,6 @@ class RxOrderForm(npyscreen.FormBaseNew):
         self.jobFld=self.add(bs.MyTitleText, name="Job №.", value="", relx=6, rely=4, begin_entry_at=13, editable=False)
         self.creationDateFld=self.add(bs.TitleDateField, name="Creation date:", value="", format=DATEFORMAT, relx=22, rely=4, begin_entry_at=25, editable=False)
 
-#        self.dateFld=self.add(bs.MyTitleDate, name="Date:", value="", relx=10, rely=5, begin_entry_at=15, editable=False)
-
         self.patientValues = self.get_all_patients()
         self.patientFld=self.add(bs.TitleChooser, name="Patient:", value="", values=self.patientValues, popupType="narrow", \
             relx=10, rely=7, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
@@ -85,42 +95,20 @@ class RxOrderForm(npyscreen.FormBaseNew):
         self.patientLabel=self.add(bs.MyFixedText, name="PatientLabel", value="[+]", relx=58, rely=7, min_width=4, max_width=4, \
             min_height=0, max_height=0, use_max_space=False, editable=False)
 
-        self.vendorValues = self.get_all_vendors()
-        self.vendorFld=self.add(bs.TitleChooser, name="Vendor:", value="", values=self.vendorValues, popupType="narrow", \
-            relx=10, rely=9, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
-            height=0, max_height=0, check_value_change=True, editable=False)
-        self.vendorLabel=self.add(bs.MyFixedText, name="VendorLabel", value="[+]", relx=58, rely=9, min_width=4, max_width=4, \
-            min_height=0, max_height=0, use_max_space=False, editable=False)
+        #self.vendorValues = self.get_all_vendors()
+        #self.vendorFld=self.add(bs.TitleChooser, name="Vendor:", value="", values=self.vendorValues, popupType="narrow", \
+        #    relx=10, rely=9, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
+        #    height=0, max_height=0, check_value_change=True, editable=False)
+        #self.vendorLabel=self.add(bs.MyFixedText, name="VendorLabel", value="[+]", relx=58, rely=9, min_width=4, max_width=4, \
+        #    min_height=0, max_height=0, use_max_space=False, editable=False)
         
-        self.labValues = self.get_all_labs()
-        self.labFld=self.add(bs.TitleChooser, name="Lab:", value="", values=self.labValues, popupType="narrow", \
-            relx=10, rely=10, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
-            height=0, max_height=0, check_value_change=True, editable=False)
-        self.labLabel=self.add(bs.MyFixedText, name="LabLabel", value="[+]", relx=10, rely=10, min_width=4, max_width=4, \
-            min_height=0, max_height=0, use_max_space=False, editable=False)
-        
-
-### Genre List, Reconfigure for new options in config.py
-#        self.genreValues = config.genreList
-#        self.genreFld=self.add(bs.TitleChooser, name="Genre:", value="", values=self.genreValues, popupType="narrow",\
-#            relx=10, rely=13, begin_entry_at=15, use_max_space=False, max_width=30, editable=False)
-#        self.genreLabel=self.add(bs.MyFixedText, name="GenreLabel", value="[+]", relx=58, rely=13, min_width=4, max_width=4, \
-#            min_height=0, max_height=0, use_max_space=False, editable=False)
-
-#        self.coverTypeValues = config.coverTypeList
-
-#        self.coverTypeFld=self.add(bs.TitleChooser, name="Cover type:", value="", values=self.coverTypeValues, popupType="narrow",\
-#            relx=10, rely=14, begin_entry_at=15, use_max_space=False, max_width=49, editable=False)
-#        self.coverTypeLabel=self.add(bs.MyFixedText, name="CoverTypeLabel", value="[+]", relx=58, rely=14, min_width=4, max_width=4, \
-#            min_height=0, max_height=0, use_max_space=False, editable=False)
-
-#        self.warehousesValues = self.get_all_warehouses()
-#        self.warehousesFld=self.add(bs.TitleChooser, name="Warehouses:", value="", values=self.warehousesValues, popupType="narrow", \
-#            relx=10, rely=15, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
+#        self.labValues = self.get_all_labs()
+#        self.labFld=self.add(bs.TitleChooser, name="Lab:", value="", values=self.labValues, popupType="narrow", \
+#            relx=10, rely=10, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
 #            height=0, max_height=0, check_value_change=True, editable=False)
-#        self.warehousesLabel=self.add(bs.MyFixedText, name="WarehousesLabel", value="[+]", relx=58, rely=15, min_width=4, max_width=4, \
+#        self.labLabel=self.add(bs.MyFixedText, name="LabLabel", value="[+]", relx=10, rely=10, min_width=4, max_width=4, \
 #            min_height=0, max_height=0, use_max_space=False, editable=False)
-
+        
         self.priceLabel = "Price " + config.currency_symbol + ":"
         self.ndecimals = config.ndecimals
         self.priceFld=self.add(bs.MyTitleMoney, name=self.priceLabel, value="", relx=15, rely=17, width=20, max_width=20, height=0, \
@@ -142,13 +130,6 @@ class RxOrderForm(npyscreen.FormBaseNew):
         chooser = self.patientFld.entry_widget
         chooser.load_values(self.patientValues)
         self.patientFld.update(clear=True)
-        # Reload publishers into the chooser field
-#        self.publisherValues = self.get_all_publishers()
-#        chooser = self.publisherFld.entry_widget
-#        chooser.load_values(self.publisherValues)
-#        self.publisherFld.update(clear=True)
-#        chooser = self.warehousesFld.entry_widget
-#        chooser.load_values(self.warehousesValues)
 
     def get_all_patients(self):
         "Returns a list of patients from DB"
@@ -210,91 +191,12 @@ class RxOrderForm(npyscreen.FormBaseNew):
 
         return lab_list
         
-#    def get_all_publishers(self):
-#        "Returns a list of publishers from DB"
-#        conn = config.conn
-#        cur = conn.cursor()
-#        cur.execute("SELECT numeral, name FROM 'bookstore.Publisher' ORDER BY name")
-#        filerows = cur.fetchall()
-#        publisher_list = []
-#        publisher_dict = {}
-#        for row in filerows:
-#            numeral = row[0]
-#            name = row[1]
-#            publisher_list.append(name)
-#            publisher_dict[name] = numeral 
-#        # We need PyICU (=icu) to order unicode strings in spanish+catalan
-#        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-#        aux_list = [i for i in publisher_list]
-#        aux_list.sort(key=collator.getSortKey)
-#
-#        publisher_list = [(publisher_dict[i],i) for i in aux_list]
-#        
-#        return publisher_list
-#
-#    def get_all_warehouses(self):
-#        "Gets and returns all warehouses from the database."
-#        conn = config.conn
-#        cur = conn.cursor()
-#        cur.execute("SELECT code FROM 'bookstore.Warehouse' ORDER BY code")
-#        filerows = cur.fetchall()
-#        # We need PyICU (=icu) to order unicode strings in spanish+catalan
-#        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-#        aux_list = [i[0] for i in filerows]
-#        aux_list.sort(key=collator.getSortKey)
-#        wh_list = [(i,) for i in aux_list]
-#        return wh_list
-#
-#    def get_book_warehouses(self):
-#        "Read all the warehouses of this book."
-#        conn = config.conn
-#        cur = conn.cursor()
-#        book_num = self.jobFld.value
-#        sqlQuery = "SELECT warehouse_num FROM 'bookstore.book_warehouse' WHERE book_num=? ORDER BY warehouse_num"
-#        cur.execute(sqlQuery, (book_num,) )
-#        filerows = cur.fetchall()
-#        warehousesField = self.set_warehouses_field(filerows)
-#        return warehousesField
-#
-#    def set_warehouses_field(self, filerows):
-#        "Sets a string enumerating the warehouse(s) code(s) of this book."
-#        conn = config.conn
-#        cur = conn.cursor()
-#        whList = []
-#        count = 0
-#        for wh in filerows:
-#            sqlQuery = "SELECT code FROM 'bookstore.warehouse' WHERE numeral=? ORDER BY numeral"
-#            cur.execute(sqlQuery, ( str(wh[0]),) )
-#            try:
-#                filerow = cur.fetchone()
-#                whList.append(filerow)
-#            except TypeError:
-#                bs.notify_OK("\n     Publisher of numeral " + str(wh[0]) + " was not found. ", "Message")
-#
-#        fieldString = ""
-#        for wh in whList:
-#            if count > 0:
-#                fieldString += ", "
-#            count += 1
-#            fieldString += wh[0]
-#        
-#        return fieldString
-#
     def backup_fields(self):
         "Fill backup variables"
         self.bu_job = self.jobFld.value
-#        self.bu_bookTitle = self.bookTitleFld.value
-#        self.bu_originalTitle = self.originalTitleFld.value
         self.bu_patient = self.patientFld.value
-#        self.bu_description = self.descriptionFld.value
-#        self.bu_isbn = self.isbnFld.value
-#        self.bu_year = self.yearFld.value
-#        self.bu_publisher = self.publisherFld.value  
-        self.bu_creationDate = self.creationDateFld.value  
-#        self.bu_genre = self.genreFld.value  
-#        self.bu_coverType = self.coverTypeFld.value  
-#        self.bu_warehouses = self.warehousesFld.value  
-        self.bu_price = self.priceFld.value  
+        self.bu_creationDate = self.creationDateFld.value
+        self.bu_price = self.priceFld.value
 
     def update_fileRow(self):
         "Updates accessible record variable."
@@ -305,16 +207,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
                     config.fileRow = []
                     config.fileRow.append(row[0])
                     config.fileRow.append(int(self.jobFld.value))
-#                    config.fileRow.append(self.bookTitleFld.value)
-#                    config.fileRow.append(self.originalTitleFld.value)
                     config.fileRow.append(self.patientFld.value)
-#                    config.fileRow.append(self.descriptionFld.value)
-#                    config.fileRow.append(self.isbnFld.value)
-#                    config.fileRow.append(self.yearFld.value)
-#                    config.fileRow.append(self.publisherFld.value)
                     config.fileRow.append(self.creationDateFld.value)
-#                    config.fileRow.append(self.genreFld.value)
-#                    config.fileRow.append(self.coverTypeFld.value)
                     price = self.priceFld.value.replace(",", ".")   # here, no matter config.decimal_symbol
                     config.fileRow.append(Decimal(price))
                     break
@@ -369,44 +263,17 @@ class RxOrderForm(npyscreen.FormBaseNew):
         form.jobFld.maximum_string_length = 6
         form.jobFld.value = str(form.get_last_job(DBTABLENAME) + 1)
 
-#        form.bookTitleFld.editable = True
-#        form.bookTitleFld.value = ""
-        
-#        form.originalTitleFld.editable = True
-#        form.originalTitleFld.value = ""
-        
         form.patientFld.editable = True
         form.patientFld.value = ""
 
-        form.vendorFld.editable = True
-        form.vendorFld.value = ""
+#        form.vendorFld.editable = True
+#        form.vendorFld.value = ""
 
         form.labFld.editable = True
         form.labFld.value = ""
         
-#        form.descriptionFld.editable = True
-#        form.descriptionFld.value = ""
-        
-#        form.isbnFld.editable = True
-#        form.isbnFld.value = ""
-        
-#        form.yearFld.editable = True
-#        form.yearFld.value = ""
-        
-#        form.publisherFld.editable = True
-#        form.publisherFld.value = ""
-        
         form.creationDateFld.editable = True
         form.creationDateFld.value = form.selectorForm.today
-        
-#        form.genreFld.editable = True
-#        form.genreFld.value = ""
-        
-#        form.coverTypeFld.editable = True
-#        form.coverTypeFld.value = ""
-        
-#        form.warehousesFld.editable = True
-#        form.warehousesFld.value = ""
         
         form.priceFld.editable = True
         form.priceFld.value = ""
@@ -429,18 +296,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
         form.current_option = "Read"
         form.convertDBtoFields()
         form.jobFld.editable = False
-        form.bookTitleFld.editable = False
-        form.originalTitleFld.editable = False
         form.patientFld.editable = False
-        form.descriptionFld.editable = False
-        form.isbnFld.editable = False
-        form.yearFld.editable = False
-        form.publisherFld.editable = False
         form.creationDateFld.editable = False
-        form.genreFld.editable = False
-        form.coverTypeFld.editable = False
-        form.warehousesFld.value = form.get_book_warehouses()
-        form.warehousesFld.editable = False
         form.priceFld.editable = False
         form.ok_button.when_pressed_function = form.readOnlyOKbtn_function
         form.ok_button.name = "OK"  # name changes between calls
@@ -460,20 +317,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
         form.convertDBtoFields()
         form.jobFld.editable = True
         form.jobFld.maximum_string_length = 6
-        form.bookTitleFld.editable = True
-        form.originalTitleFld.editable = True
         form.patientFld.editable = True
-        form.descriptionFld.editable = True
-        form.isbnFld.editable = True
-        form.isbnFld.maximum_string_length = 17     # Four hyphens included
-        form.yearFld.editable = True
-        form.yearFld.maximum_string_length = 5      # 4 digits + minus sign
-        form.publisherFld.editable = True
         form.creationDateFld.editable = True
-        form.genreFld.editable = True
-        form.coverTypeFld.editable = True
-        form.warehousesFld.editable = True
-        form.warehousesFld.value = form.get_book_warehouses()
         form.priceFld.editable = True
         form.priceFld.maximum_string_length = 8
         form.ok_button.when_pressed_function = form.updateOKbtn_function
@@ -493,18 +338,10 @@ class RxOrderForm(npyscreen.FormBaseNew):
         form.current_option = "Delete"
         form.convertDBtoFields()
         form.jobFld.editable = False
-        form.bookTitleFld.editable = False
-        form.originalTitleFld.editable = False
         form.patientFld.editable = False
-        form.descriptionFld.editable = False
-        form.isbnFld.editable = False
-        form.yearFld.editable = False
-        form.publisherFld.editable = False
         form.creationDateFld.editable = False
-        form.genreFld.editable = False
-        form.coverTypeFld.editable = False
-        form.warehousesFld.value = form.get_book_warehouses()
-        form.warehousesFld.editable = False
+#        form.warehousesFld.value = form.get_book_warehouses()
+#        form.warehousesFld.editable = False
         form.priceFld.editable = False
         form.ok_button.when_pressed_function = form.deleteOKbtn_function
         form.ok_button.name = "Delete"
@@ -534,16 +371,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
     def strip_fields(self):
         "Required trimming of leading and trailing spaces."
         self.jobFld.value = self.jobFld.value.strip()
-        self.bookTitleFld.value = self.bookTitleFld.value.strip()
-        self.originalTitleFld.value = self.originalTitleFld.value.strip()
         self.patientFld.value = self.patientFld.value.strip()
-        self.descriptionFld.value = self.descriptionFld.value.strip()
-        self.isbnFld.value = self.isbnFld.value.strip()
-        self.yearFld.value = self.yearFld.value.strip()
-        self.publisherFld.value = self.publisherFld.value.strip()
         self.creationDateFld.value = self.creationDateFld.value.strip()
-        self.genreFld.value = self.genreFld.value.strip()
-        self.coverTypeFld.value = self.coverTypeFld.value.strip()
         self.priceFld.value = self.priceFld.value.strip()
     
     def save_mem_record(self):
@@ -551,16 +380,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
         config.fileRow = []
         config.fileRow.append(None)    # ID field is incremental, fulfilled later
         config.fileRow.append(int(self.jobFld.value))
-        config.fileRow.append(self.bookTitleFld.value)
-        config.fileRow.append(self.originalTitleFld.value)
         config.fileRow.append(self.patientFld.value)
-        config.fileRow.append(self.descriptionFld.value)
-        config.fileRow.append(self.isbnFld.value)
-        config.fileRow.append(int(self.yearFld.value))
-        config.fileRow.append(self.publisherFld.value)
         config.fileRow.append(self.creationDateFld.value)
-        config.fileRow.append(self.genreFld.value)
-        config.fileRow.append(self.coverTypeFld.value)
         ctx = decimal.getcontext()
         ctx.prec = 6
         ctx.rounding = decimal.ROUND_HALF_DOWN  # rounds if enters more than self.ndecimals decimals
@@ -633,14 +454,14 @@ class RxOrderForm(npyscreen.FormBaseNew):
             config.fileRow = []
         
         # Delete book_author relationship table row(s)
-        sqlQuery = "DELETE FROM 'bookstore.book_author' WHERE book_num = " + str(numeral)
-        cur.execute(sqlQuery)
-        conn.commit()
+#        sqlQuery = "DELETE FROM 'optidrome.book_author' WHERE book_num = " + str(numeral)
+#        cur.execute(sqlQuery)
+#        conn.commit()
 
         # Delete book_warehouse relationship table row(s)
-        sqlQuery = "DELETE FROM 'bookstore.book_warehouse' WHERE book_num = " + str(numeral)
-        cur.execute(sqlQuery)
-        conn.commit()
+#        sqlQuery = "DELETE FROM 'bookstore.book_warehouse' WHERE book_num = " + str(numeral)
+#        cur.execute(sqlQuery)
+#        conn.commit()
 
         self.exitRxOrder(modified=True)
 
@@ -682,31 +503,13 @@ class RxOrderForm(npyscreen.FormBaseNew):
         emptyField = False
         if self.jobFld.value == "":
             emptyField = True
-            self.editw = self.get_editw_number("Numeral:") - 1
-        elif self.bookTitleFld.value == "":  
-            emptyField = True
-            self.editw = self.get_editw_number("Title:") - 1
+            self.editw = self.get_editw_number("Job №.") - 1
         elif self.patientFld.value == "":  
             emptyField = True
-            self.editw = self.get_editw_number("Author:") - 1
-        elif self.isbnFld.value == "":  
-            emptyField = True
-            self.editw = self.get_editw_number("ISBN/SKU:") - 1
-        elif self.yearFld.value == "":  
-            emptyField = True
-            self.editw = self.get_editw_number("Public. year:") - 1
-        elif self.publisherFld.value == "":  
-            emptyField = True
-            self.editw = self.get_editw_number("Publisher:") - 1
+            self.editw = self.get_editw_number("Patient:") - 1
         elif self.creationDateFld.value == "":
             emptyField = True
             self.editw = self.get_editw_number("Creation date:") - 1
-        elif self.genreFld.value == "":
-            emptyField = True
-            self.editw = self.get_editw_number("Genre:") - 1
-        elif self.coverTypeFld.value == "":
-            emptyField = True
-            self.editw = self.get_editw_number("Cover type:") - 1
         elif self.priceFld.value == "":
             emptyField = True
             self.editw = self.get_editw_number(self.priceLabel) - 1
@@ -719,12 +522,12 @@ class RxOrderForm(npyscreen.FormBaseNew):
         try:
             a = int(self.jobFld.value)
         except ValueError:
-            self.editw = self.get_editw_number("Numeral:") - 1
+            self.editw = self.get_editw_number("Job №.") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Numeral must be integer"
             return errorMsg
         if len(self.jobFld.value) > self.jobFld.maximum_string_length:
-            self.editw = self.get_editw_number("Numeral:") - 1
+            self.editw = self.get_editw_number("Job №.") - 1
             self.ok_button.editing = False
             errorMsg = "Error: Numeral maximum length exceeded"
             return errorMsg
@@ -764,7 +567,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
                 self.ok_button.editing = False
                 # Already exists and it's not itself
                 if row[1] == int(self.jobFld.value) and self.jobFld.value != self.bu_job:
-                    self.editw = self.get_editw_number("Numeral:") - 1
+                    self.editw = self.get_editw_number("Job №.") - 1
                     errorMsg = "Error:  Numeral already exists"
                     return errorMsg
                 # Already exists and it's not itself
@@ -777,17 +580,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
         "Checking for changes to the fields."
         exist_changes = False
         if self.jobFld.value != self.bu_job or \
-            self.bookTitleFld.value != self.bu_bookTitle or \
-            self.originalTitleFld.value != self.bu_originalTitle or \
             self.patientFld.value != self.bu_patient or \
-            self.descriptionFld.value != self.bu_description or \
-            self.isbnFld.value != self.bu_isbn or \
-            self.yearFld.value != self.bu_year or \
-            self.publisherFld.value != self.bu_publisher or \
             self.creationDateFld.value != self.bu_creationDate or \
-            self.genreFld.value != self.bu_genre or \
-            self.coverTypeFld.value != self.bu_coverType or \
-            self.warehousesFld.value != self.bu_warehouses or \
             self.priceFld.value != self.bu_price :
             exist_changes = True
         return exist_changes    
@@ -797,26 +591,26 @@ class RxOrderForm(npyscreen.FormBaseNew):
         self.statusLine.display()
         curses.beep()
 
-    def get_publisher_num(self):
-        "Finds publisher numeral or gets a new one."
-        pub_list = self.get_all_publishers()
-        for p in pub_list:
-            if p[1].lower() == self.publisherFld.value.lower():
-                return p[0]     # = publisher.numeral
-        # not found:
-        # it can be a typo error:
-        message = "\n  Publisher was not found. Create it as a new one?"
-        if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-            return None
-        num = self.get_last_mrn("'bookstore.publisher'") + 1
-        conn = config.conn
-        cur = conn.cursor()
-        sqlQuery = "INSERT INTO 'bookstore.publisher' (numeral,name,address,phone,url) VALUES (?,?,?,?,?)"
-        values = (num, self.publisherFld.value, "", "", "")  # some fields are filled empty
-        cur.execute(sqlQuery, values)
-        conn.commit()
-        bs.notify_OK("\n      A new publisher was created.\n      Remember to fulfill all the data in its file.", "Message")
-        return num
+#    def get_publisher_num(self):
+#        "Finds publisher numeral or gets a new one."
+#        pub_list = self.get_all_publishers()
+#        for p in pub_list:
+#            if p[1].lower() == self.publisherFld.value.lower():
+#                return p[0]     # = publisher.numeral
+#        # not found:
+#        # it can be a typo error:
+#        message = "\n  Publisher was not found. Create it as a new one?"
+#        if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
+#            return None
+#        num = self.get_last_mrn("'bookstore.publisher'") + 1
+#        conn = config.conn
+#        cur = conn.cursor()
+#        sqlQuery = "INSERT INTO 'bookstore.publisher' (numeral,name,address,phone,url) VALUES (?,?,?,?,?)"
+#        values = (num, self.publisherFld.value, "", "", "")  # some fields are filled empty
+#        cur.execute(sqlQuery, values)
+#        conn.commit()
+#        bs.notify_OK("\n      A new publisher was created.\n      Remember to fulfill all the data in its file.", "Message")
+#        return num
 
     def save_created_book(self):
         "Button based Save function for C=Create."
@@ -830,39 +624,38 @@ class RxOrderForm(npyscreen.FormBaseNew):
             row = cur.fetchone()
             self.patient_mrn = row[1]
         except TypeError:   # author does not exist
-            message = "\n   Author was not found. Create it as a new one?"
+            message = "\n   Patient was not found. Create it as a new one?"
             if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
                 self.patient_mrn = self.get_last_mrn("'optidrome.patient'") + 1
                 sqlQuery = "INSERT INTO 'optidrome.patient' (mrn, name, dob, phone, email) VALUES (?,?,?,?,?)"
                 values = (int(self.patient_mrn), self.patientFld.value, "", "", "")  # some fields are filled empty
                 cur.execute(sqlQuery, values)
                 conn.commit()
-                bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
+                bs.notify_OK("\n      A new patient was created.\n      Remember to fulfill all the data in their file.", "Message")
             else:
-                bs.notify_OK("\n      Getting back to book form.\n      Choose or enter a valid author.", "Message")
+                bs.notify_OK("\n      Getting back to order form.\n      Choose or enter a valid patient.", "Message")
                 return
 
         # creation of book_author intermediate table
-        sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
-        values = (int(self.jobFld.value), int(self.patient_mrn), 1)
-        cur.execute(sqlQuery, values)
-        conn.commit()
+#        sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
+#        values = (int(self.jobFld.value), int(self.patient_mrn), 1)
+#        cur.execute(sqlQuery, values)
+#        conn.commit()
         conn.isolation_level = None     # free the multiuser lock
 
         # Create the book record
         
-        publisher_num = self.get_publisher_num()    # Publisher is a direct reference to another table
-        if publisher_num == None:
-            return  # back to form
+#        publisher_num = self.get_publisher_num()    # Publisher is a direct reference to another table
+#        if publisher_num == None:
+#            return  # back to form
         DBcreationDate = self.screenToDBDate(self.creationDateFld.value, self.creationDateFld.format)
-        genre = int(self.genreFld.value[0])   # initial only
-        cover_type = int(self.coverTypeFld.value[0])   # initial only
+#        genre = int(self.genreFld.value[0])   # initial only
+#        cover_type = int(self.coverTypeFld.value[0])   # initial only
         price = self.priceFld.value.replace(",", ".")   # here, no matter config.decimal_symbol
         price = float(Decimal(price))
-        columns = " (numeral,book_title,original_title,description,isbn,year,publisher_num,creation_date,genre_id,cover_type,price) "
-        sqlQuery = "INSERT INTO " + DBTABLENAME + columns + " VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-        values = (int(self.jobFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, \
-            self.isbnFld.value, int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price)
+        columns = " (job,creation_date,price) "
+        sqlQuery = "INSERT INTO " + DBTABLENAME + columns + " VALUES (?,?,?)"
+        values = (int(self.jobFld.value), DBcreationDate, price)
         cur.execute(sqlQuery, values)
         conn.commit()
         config.fileRow[0] = cur.lastrowid
@@ -897,17 +690,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
         # update config.fileRows:
         new_record = []
         new_record.append(config.fileRow[0])
-        new_record.append(int(self.jobFld.value))
-        new_record.append(self.bookTitleFld.value)
-        new_record.append(self.originalTitleFld.value)
         new_record.append(self.patientFld.value)
-        new_record.append(self.descriptionFld.value)
-        new_record.append(self.isbnFld.value)
-        new_record.append(self.yearFld.value)
-        new_record.append(self.publisherFld.value)
         new_record.append(self.creationDateFld.value)
-        new_record.append(self.genreFld.value)
-        new_record.append(self.coverTypeFld.value)
         new_record.append(Decimal(price))
         config.fileRows.append(new_record)
         self.exitRxOrder(modified=True)
@@ -1149,14 +933,14 @@ class RxOrderForm(npyscreen.FormBaseNew):
 
     def is_editable_field(self, widget=None):
         "Hooked from bs.MyAutocomplete.filter_char()"
-        if widget.name == "Author:" or widget.name == "Publisher:" or widget.name == "Warehouses:" :
+        if widget.name == "Patient:" or widget.name == "Publisher:" or widget.name == "Warehouses:" :
             return True
         else:
             return False
 
     def not_first_keypress(self, widget=None):
         "Hooked from bs.MyAutocomplete.h_exit_up()"
-        if widget.name == "Author:" :
+        if widget.name == "Patient:" :
             widget.first_keypress = False
         elif widget.name == "Publisher:" :
             widget.first_keypress = False
@@ -1169,7 +953,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
 
     def create_popup_window(self, widget=None):
         "Hooked from bs.MyAutocomplete.get_choice()"
-        if widget.name == "Author:" :
+        if widget.name == "Patient:" :
             tmp_window = bs.MyPopup(self, name=widget.name, framed=True, show_atx=39, show_aty=3, columns=36, lines=14, shortcut_len=None)
         elif widget.name == "Publisher:" :
             tmp_window = bs.MyPopup(self, name=widget.name, framed=True, show_atx=39, show_aty=6, columns=39, lines=14, shortcut_len=None)
@@ -1192,7 +976,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
     def scan_value_in_list(self, widget=None):
         "Hooked from bs.MyAutocomplete.when_check_value_changed()"
         widget_value = widget.value
-        if widget.name == "Author:" or widget.name == "Publisher:" :
+        if widget.name == "Patient:" or widget.name == "Publisher:" :
             if widget.cursor_position != 0:
                 widget_value = widget.value[:widget.cursor_position]
                 found_value = widget.find_value_literal(widget_value)
@@ -1224,7 +1008,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
     def get_parentField(self, widget=None):
         "Hooked from bs.MyPopup.__init__()"
         parentField = None
-        if widget.name == "Author:" :
+        if widget.name == "Patient:" :
             parentField = self.patientFld
         elif widget.name == "Publisher:" :
             parentField = self.publisherFld
