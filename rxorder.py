@@ -147,49 +147,49 @@ class RxOrderForm(npyscreen.FormBaseNew):
         patient_list = [(i,) for i in aux_list]
         return patient_list
     
-    def get_all_vendors(self):
-        "Returns a list of vendors from DB where is_lab is False"
-        conn = config.conn
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM 'optidrome.vendor' WHERE is_lab = 0 ORDER BY name")
-        filerows = cur.fetchall()
-        vendor_list = []
-        vendor_dict = {}
-        for row in filerows:
-            vendor_num = row[0]
-            name = row[1]
-            vendor_list.append(name)
-            vendor_dict[name] = vendor_num
-        # We need PyICU (=icu) to order unicode strings in spanish+catalan
-        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-        aux_list = [i for i in vendor_list]
-        aux_list.sort(key=collator.getSortKey)
-
-        vendor_list = [(vendor_dict[i],i) for i in aux_list]
-
-        return vendor_list
+#    def get_all_vendors(self):
+#        "Returns a list of vendors from DB where is_lab is False"
+#        conn = config.conn
+#        cur = conn.cursor()
+#        cur.execute("SELECT name FROM 'optidrome.vendor' WHERE is_lab = 0 ORDER BY name")
+#        filerows = cur.fetchall()
+#        vendor_list = []
+#        vendor_dict = {}
+#        for row in filerows:
+#            vendor_num = row[0]
+#            name = row[1]
+#            vendor_list.append(name)
+#            vendor_dict[name] = vendor_num
+#        # We need PyICU (=icu) to order unicode strings in spanish+catalan
+#        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
+#        aux_list = [i for i in vendor_list]
+#        aux_list.sort(key=collator.getSortKey)
+#
+#        vendor_list = [(vendor_dict[i],i) for i in aux_list]
+#
+#        return vendor_list
     
-    def get_all_labs(self):
-        "Returns a list of labs from DB where is_lab is True"
-        conn = config.conn
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM 'optidrome.vendor' WHERE is_lab = 1 ORDER BY name")
-        filerows = cur.fetchall()
-        lab_list = []
-        lab_dict = {}
-        for row in filerows:
-            lab_num = row[0]
-            name = row[1]
-            lab_list.append(name)
-            lab_dict[name] = lab_num
-        # We need PyICU (=icu) to order unicode strings in spanish+catalan
-        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
-        aux_list = [i for i in lab_list]
-        aux_list.sort(key=collator.getSortKey)
-
-        lab_list = [(lab_dict[i],i) for i in aux_list]
-
-        return lab_list
+#    def get_all_labs(self):
+#        "Returns a list of labs from DB where is_lab is True"
+#        conn = config.conn
+#        cur = conn.cursor()
+#        cur.execute("SELECT name FROM 'optidrome.vendor' WHERE is_lab = 1 ORDER BY name")
+#        filerows = cur.fetchall()
+#        lab_list = []
+#        lab_dict = {}
+#        for row in filerows:
+#            lab_num = row[0]
+#            name = row[1]
+#            lab_list.append(name)
+#            lab_dict[name] = lab_num
+#        # We need PyICU (=icu) to order unicode strings in spanish+catalan
+#        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
+#        aux_list = [i for i in lab_list]
+#        aux_list.sort(key=collator.getSortKey)
+#
+#        lab_list = [(lab_dict[i],i) for i in aux_list]
+#
+#        return lab_list
         
     def backup_fields(self):
         "Fill backup variables"
@@ -269,8 +269,8 @@ class RxOrderForm(npyscreen.FormBaseNew):
 #        form.vendorFld.editable = True
 #        form.vendorFld.value = ""
 
-        form.labFld.editable = True
-        form.labFld.value = ""
+#        form.labFld.editable = True
+#        form.labFld.value = ""
         
         form.creationDateFld.editable = True
         form.creationDateFld.value = form.selectorForm.today
@@ -287,7 +287,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
         form.statusLine.value = "Creating a new record"
         
         form.backup_fields()
-        form.editw = form.get_editw_number("Title:")
+#        form.editw = form.get_editw_number("Title:")
         config.last_operation = "Create"
 
     def set_readOnlyMode():
@@ -353,17 +353,17 @@ class RxOrderForm(npyscreen.FormBaseNew):
     def convertDBtoFields(self):
         "Convert DB fields into screen fields (strings)."
         self.jobFld.value = str(config.fileRow[1])
-        self.bookTitleFld.value = config.fileRow[2]
-        self.originalTitleFld.value = config.fileRow[3]
-        self.patientFld.value = self.selectorForm.get_author_name(config.fileRow[1])
-        self.descriptionFld.value = config.fileRow[5]
-        self.isbnFld.value = config.fileRow[6]
-        self.yearFld.value = str(config.fileRow[7])
-        self.publisherFld.value = config.fileRow[8]
-        self.creationDateFld.value = self.DBtoScreenDate(config.fileRow[9], DATEFORMAT)
-        self.genreFld.value = str(config.fileRow[10])+"-"+self.genreValues[config.fileRow[10] - 1]
-        self.coverTypeFld.value = str(config.fileRow[11])+"-"+self.coverTypeValues[config.fileRow[11] - 1]
-        price = str(config.fileRow[12])
+#        self.bookTitleFld.value = config.fileRow[2]
+#        self.originalTitleFld.value = config.fileRow[3]
+        self.patientFld.value = self.selectorForm.get_patient_name(config.fileRow[1])
+#        self.descriptionFld.value = config.fileRow[5]
+#        self.isbnFld.value = config.fileRow[6]
+#        self.yearFld.value = str(config.fileRow[7])
+#        self.publisherFld.value = config.fileRow[8]
+#        self.creationDateFld.value = self.DBtoScreenDate(config.fileRow[9], DATEFORMAT)
+#        self.genreFld.value = str(config.fileRow[10])+"-"+self.genreValues[config.fileRow[10] - 1]
+#        self.coverTypeFld.value = str(config.fileRow[11])+"-"+self.coverTypeValues[config.fileRow[11] - 1]
+        price = str(config.fileRow[3])
         if config.decimal_symbol == ",":
             price = price.replace(".", ",")     # screen value only
         self.priceFld.value = price
@@ -533,13 +533,13 @@ class RxOrderForm(npyscreen.FormBaseNew):
             return errorMsg
 
         # wrong value check: year field
-        try:
-            a = int(self.yearFld.value)     # includes negative years
-        except ValueError:
-            self.editw = self.get_editw_number("Public. year:") - 1
-            self.ok_button.editing = False
-            errorMsg = "Error: Year must be integer"
-            return errorMsg
+#        try:
+#            a = int(self.yearFld.value)     # includes negative years
+#        except ValueError:
+#            self.editw = self.get_editw_number("Public. year:") - 1
+#            self.ok_button.editing = False
+#            errorMsg = "Error: Year must be integer"
+#            return errorMsg
 
         # wrong date check:
         if not self.creationDateFld.check_value_is_ok():
@@ -571,10 +571,10 @@ class RxOrderForm(npyscreen.FormBaseNew):
                     errorMsg = "Error:  Numeral already exists"
                     return errorMsg
                 # Already exists and it's not itself
-                if row[2] == self.isbnFld.value and self.isbnFld.value != self.bu_isbn:
-                    self.editw = self.get_editw_number("ISBN/SKU:") - 1
-                    errorMsg = "Error:  ISBN/SKU already exists"
-                    return errorMsg
+#                if row[2] == self.isbnFld.value and self.isbnFld.value != self.bu_isbn:
+#                    self.editw = self.get_editw_number("ISBN/SKU:") - 1
+#                    errorMsg = "Error:  ISBN/SKU already exists"
+#                    return errorMsg
 
     def exist_changes(self):
         "Checking for changes to the fields."
@@ -663,29 +663,29 @@ class RxOrderForm(npyscreen.FormBaseNew):
 
         # Manage book warehouses:
         # warehouses existence check and update of book_warehouse intermediate table:
-        if self.warehousesFld.value != self.bu_warehouses:
-            whList = list(self.warehousesFld.value.split(","))
-            for wh in whList:
-                if wh == "":    # clean up the list for extra commas
-                    continue
-                try:
-                    sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE code=?"
-                    cur.execute(sqlQuery, (wh.strip(),) )
-                    row = cur.fetchone()
-                    warehouse_num = row[0]  # jumps to except if does not exist
-                    # Create the book_warehouse if it doesn't exist:
-                    sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
-                    cur.execute(sqlQuery, (self.jobFld.value, str(warehouse_num),) )
-                    row = cur.fetchone()
-                    if row == None:   # book_warehouse does not exist, create it
-                        sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
-                        values = (int(self.jobFld.value), int(warehouse_num), None, None)
-                        cur.execute(sqlQuery, values)
-                        conn.commit()
-                except TypeError:   # warehouse does not exist, we don't create it at this point.
-                    message = "\n   Warehouse '" + wh + "' was not found. Create it beforehand."
-                    bs.notify_OK(message, title="", wrap=True, editw = 1,)
-                    continue
+#        if self.warehousesFld.value != self.bu_warehouses:
+#            whList = list(self.warehousesFld.value.split(","))
+#            for wh in whList:
+#                if wh == "":    # clean up the list for extra commas
+#                    continue
+#                try:
+#                    sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE code=?"
+#                    cur.execute(sqlQuery, (wh.strip(),) )
+#                    row = cur.fetchone()
+#                    warehouse_num = row[0]  # jumps to except if does not exist
+#                    # Create the book_warehouse if it doesn't exist:
+#                    sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
+#                    cur.execute(sqlQuery, (self.jobFld.value, str(warehouse_num),) )
+#                    row = cur.fetchone()
+#                    if row == None:   # book_warehouse does not exist, create it
+#                        sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
+#                        values = (int(self.jobFld.value), int(warehouse_num), None, None)
+#                        cur.execute(sqlQuery, values)
+#                        conn.commit()
+#                except TypeError:   # warehouse does not exist, we don't create it at this point.
+#                    message = "\n   Warehouse '" + wh + "' was not found. Create it beforehand."
+#                    bs.notify_OK(message, title="", wrap=True, editw = 1,)
+#                    continue
 
         # update config.fileRows:
         new_record = []
@@ -696,134 +696,139 @@ class RxOrderForm(npyscreen.FormBaseNew):
         config.fileRows.append(new_record)
         self.exitRxOrder(modified=True)
 
-    def save_updated_book(self):
-        "Button based Save function for U=Update."
+#    def save_updated_book(self):
+#        "Button based Save function for U=Update."
+#
+#        conn = config.conn
+#        cur = conn.cursor()
+#
+#        # if numeral has changed (already checked for non-existence), update book_author and book_warehouse intermediate tables
+#        if self.jobFld.value != self.bu_job:
+#
+#            columns = "book_num=?"
+#            new_numeral = int(self.jobFld.value)
+#            old_numeral = int(self.bu_job)
+#            sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
+#            values = (new_numeral, old_numeral)
+#            try:
+#                cur.execute(sqlQuery, values)
+#                conn.commit()
+#            except sqlite3.IntegrityError:
+#                bs.notify_OK("\n     Numeral of book already exists. ", "Message")
+#                return
+#
+#            sqlQuery = "UPDATE 'bookstore.book_warehouse' SET " + columns + " WHERE book_num=?"
+#            values = (new_numeral, old_numeral)
+#            cur.execute(sqlQuery, values)
+#            conn.commit()
+#
+#        # Check if author has changed, and if exists, to update intermediate book_author table
+#        if self.patientFld.value != self.bu_patient:
+#            try:
+#                sqlQuery = "SELECT id, numeral, name FROM 'bookstore.author' WHERE name=?"
+#                cur.execute(sqlQuery, (self.patientFld.value,) )
+#                row = cur.fetchone()
+#                self.patient_mrn = row[1]
+#            except TypeError:   # author does not exist
+#                message = "\n   Author was not found. Create it as a new one?"
+#                if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
+#                    self.patient_mrn = self.get_last_mrn("'bookstore.author'") + 1
+#                    sqlQuery = "INSERT INTO 'bookstore.author' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
+#                    values = (self.patient_mrn, self.patientFld.value, "", "", "")  # some fields are filled empty
+#                    cur.execute(sqlQuery, values)
+#                    conn.commit()
+#                    bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
+#                else:
+#                    bs.notify_OK("\n      Getting back to book form.\n      Choose or enter a valid author.", "Message")
+#                    return
+#            # update of book_author intermediate table
+#            try:
+#                columns = "book_num=?, author_num=?, is_main_author=?"
+#                if self.jobFld.value == self.bu_job:
+#                    numeral = int(self.jobFld.value)
+#                else:
+#                    numeral = int(self.bu_job)
+#                sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
+#                values = (numeral, self.patient_mrn, 1, numeral)
+#                cur.execute(sqlQuery, values)
+#                conn.commit()
+#            except TypeError:   # book_author does not exist, create it
+#                sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
+#                values = (int(self.jobFld.value), self.patient_mrn, 1)
+#                cur.execute(sqlQuery, values)
+#                conn.commit()
+#
+#        # Publisher is a direct reference to another table
+#        publisher_num = self.get_publisher_num()
+#        if publisher_num == None:
+#            return  # back to form
+#        DBcreationDate = self.screenToDBDate(self.creationDateFld.value, self.creationDateFld.format)
+#        genre = int(self.genreFld.value[0])   # initial only
+#        cover_type = int(self.coverTypeFld.value[0])   # initial only
+#
+#        # Manage book warehouses:
+#        # warehouses existence check and update of book_warehouse intermediate table
+#        if self.warehousesFld.value != self.bu_warehouses:
+#            whList = list(self.warehousesFld.value.split(","))
+#            for wh in whList:
+#                if wh == "":    # clean up the list for extra commas
+#                    continue
+#                try:
+#                    sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE code=?"
+#                    cur.execute(sqlQuery, ( wh.strip(),) )
+#                    row = cur.fetchone()
+#                    warehouse_num = row[0]  # jumps to except if does not exist
+#                    # Create the book_warehouse if it doesn't exist:
+#                    sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
+#                    cur.execute(sqlQuery, (self.jobFld.value, str(warehouse_num),) )
+#                    row = cur.fetchone()
+#                    if row == None:   # book_warehouse does not exist, create it
+#                        sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
+#                        values = (int(self.jobFld.value), int(warehouse_num), None, None)
+#                        cur.execute(sqlQuery, values)
+#                        conn.commit()
+#                except TypeError:   # warehouse does not exist, we don't create it at this point.
+#                    message = "\n   Warehouse '" + wh + "' was not found. Create it beforehand."
+#                    bs.notify_OK(message, title="", wrap=True, editw = 1,)
+#                    continue
+#            
+#            # Deletion of erased book_warehouses:
+#            diffList = self.make_differences_list(self.warehousesFld.value, self.bu_warehouses)
+#            conn = config.conn
+#            cur = conn.cursor()
+#            for wh in diffList:
+#                if wh[0] == "-":    # it's a deletion
+#                    wh = wh[1:]
+#
+#                    message = "\n   Select OK to delete warehouse '" + wh + "' for this book."
+#                    if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
+#                        bs.notify_OK("\n  Nothing was deleted.", "Message")
+#                        return
+#                    sqlQuery = "SELECT numeral FROM 'bookstore.warehouse' WHERE code=?"
+#                    cur.execute(sqlQuery, (wh,) )
+#                    row = cur.fetchone()                                        
+#                    book_num = self.jobFld.value
+#                    warehouse_num = str(row[0])
+#                    cur.execute("DELETE FROM 'bookstore.book_warehouse' WHERE book_num="+book_num+" AND warehouse_num="+warehouse_num)
+#                    conn.commit()
 
-        conn = config.conn
-        cur = conn.cursor()
+##########################################
+### MOST EDIT TO OCCUR HERE:
+##########################################
 
-        # if numeral has changed (already checked for non-existence), update book_author and book_warehouse intermediate tables
-        if self.jobFld.value != self.bu_job:
-
-            columns = "book_num=?"
-            new_numeral = int(self.jobFld.value)
-            old_numeral = int(self.bu_job)
-            sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
-            values = (new_numeral, old_numeral)
-            try:
-                cur.execute(sqlQuery, values)
-                conn.commit()
-            except sqlite3.IntegrityError:
-                bs.notify_OK("\n     Numeral of book already exists. ", "Message")
-                return
-
-            sqlQuery = "UPDATE 'bookstore.book_warehouse' SET " + columns + " WHERE book_num=?"
-            values = (new_numeral, old_numeral)
-            cur.execute(sqlQuery, values)
-            conn.commit()
-
-        # Check if author has changed, and if exists, to update intermediate book_author table
-        if self.patientFld.value != self.bu_patient:
-            try:
-                sqlQuery = "SELECT id, numeral, name FROM 'bookstore.author' WHERE name=?"
-                cur.execute(sqlQuery, (self.patientFld.value,) )
-                row = cur.fetchone()
-                self.patient_mrn = row[1]
-            except TypeError:   # author does not exist
-                message = "\n   Author was not found. Create it as a new one?"
-                if bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                    self.patient_mrn = self.get_last_mrn("'bookstore.author'") + 1
-                    sqlQuery = "INSERT INTO 'bookstore.author' (numeral, name, address, bio, url) VALUES (?,?,?,?,?)"
-                    values = (self.patient_mrn, self.patientFld.value, "", "", "")  # some fields are filled empty
-                    cur.execute(sqlQuery, values)
-                    conn.commit()
-                    bs.notify_OK("\n      A new author was created.\n      Remember to fulfill all the data in its file.", "Message")
-                else:
-                    bs.notify_OK("\n      Getting back to book form.\n      Choose or enter a valid author.", "Message")
-                    return
-            # update of book_author intermediate table
-            try:
-                columns = "book_num=?, author_num=?, is_main_author=?"
-                if self.jobFld.value == self.bu_job:
-                    numeral = int(self.jobFld.value)
-                else:
-                    numeral = int(self.bu_job)
-                sqlQuery = "UPDATE 'bookstore.book_author' SET " + columns + " WHERE book_num=?"
-                values = (numeral, self.patient_mrn, 1, numeral)
-                cur.execute(sqlQuery, values)
-                conn.commit()
-            except TypeError:   # book_author does not exist, create it
-                sqlQuery = "INSERT INTO 'bookstore.book_author' (book_num, author_num, is_main_author) VALUES (?,?,?)"
-                values = (int(self.jobFld.value), self.patient_mrn, 1)
-                cur.execute(sqlQuery, values)
-                conn.commit()
-
-        # Publisher is a direct reference to another table
-        publisher_num = self.get_publisher_num()
-        if publisher_num == None:
-            return  # back to form
-        DBcreationDate = self.screenToDBDate(self.creationDateFld.value, self.creationDateFld.format)
-        genre = int(self.genreFld.value[0])   # initial only
-        cover_type = int(self.coverTypeFld.value[0])   # initial only
-
-        # Manage book warehouses:
-        # warehouses existence check and update of book_warehouse intermediate table
-        if self.warehousesFld.value != self.bu_warehouses:
-            whList = list(self.warehousesFld.value.split(","))
-            for wh in whList:
-                if wh == "":    # clean up the list for extra commas
-                    continue
-                try:
-                    sqlQuery = "SELECT numeral, code FROM 'bookstore.warehouse' WHERE code=?"
-                    cur.execute(sqlQuery, ( wh.strip(),) )
-                    row = cur.fetchone()
-                    warehouse_num = row[0]  # jumps to except if does not exist
-                    # Create the book_warehouse if it doesn't exist:
-                    sqlQuery = "SELECT * FROM 'bookstore.book_warehouse' WHERE book_num=? AND warehouse_num=?"
-                    cur.execute(sqlQuery, (self.jobFld.value, str(warehouse_num),) )
-                    row = cur.fetchone()
-                    if row == None:   # book_warehouse does not exist, create it
-                        sqlQuery = "INSERT INTO 'bookstore.book_warehouse' (book_num, warehouse_num, bookshelf, stock) VALUES (?,?,?,?)"
-                        values = (int(self.jobFld.value), int(warehouse_num), None, None)
-                        cur.execute(sqlQuery, values)
-                        conn.commit()
-                except TypeError:   # warehouse does not exist, we don't create it at this point.
-                    message = "\n   Warehouse '" + wh + "' was not found. Create it beforehand."
-                    bs.notify_OK(message, title="", wrap=True, editw = 1,)
-                    continue
-            
-            # Deletion of erased book_warehouses:
-            diffList = self.make_differences_list(self.warehousesFld.value, self.bu_warehouses)
-            conn = config.conn
-            cur = conn.cursor()
-            for wh in diffList:
-                if wh[0] == "-":    # it's a deletion
-                    wh = wh[1:]
-
-                    message = "\n   Select OK to delete warehouse '" + wh + "' for this book."
-                    if not bs.notify_ok_cancel(message, title="", wrap=True, editw = 1,):
-                        bs.notify_OK("\n  Nothing was deleted.", "Message")
-                        return
-                    sqlQuery = "SELECT numeral FROM 'bookstore.warehouse' WHERE code=?"
-                    cur.execute(sqlQuery, (wh,) )
-                    row = cur.fetchone()                                        
-                    book_num = self.jobFld.value
-                    warehouse_num = str(row[0])
-                    cur.execute("DELETE FROM 'bookstore.book_warehouse' WHERE book_num="+book_num+" AND warehouse_num="+warehouse_num)
-                    conn.commit()
 
         # Update the Book record
 
-        price = self.priceFld.value.replace(",", ".")   # here, no matter config.decimal_symbol
-        price = float(Decimal(price))
-        columns = "numeral=?, book_title=?, original_title=?, description=?, isbn=?, year=?, publisher_num=?, creation_date=?, genre_id=?, cover_type=?, price=?"
-        sqlQuery = "UPDATE " + DBTABLENAME + " SET " + columns + " WHERE id=?"
-        values = (int(self.jobFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, self.isbnFld.value, \
-            int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price, config.fileRow[0])
-        cur.execute(sqlQuery, values)
-        conn.commit()
-        bs.notify("\n       Record saved", title="Message", form_color='STANDOUT', wrap=True, wide=False)
-        self.exitRxOrder(modified=True)
+ #       price = self.priceFld.value.replace(",", ".")   # here, no matter config.decimal_symbol
+ #       price = float(Decimal(price))
+ #       columns = "numeral=?, book_title=?, original_title=?, description=?, isbn=?, year=?, publisher_num=?, creation_date=?, genre_id=?, cover_type=?, price=?"
+ #       sqlQuery = "UPDATE " + DBTABLENAME + " SET " + columns + " WHERE id=?"
+ #       values = (int(self.jobFld.value), self.bookTitleFld.value, self.originalTitleFld.value, self.descriptionFld.value, self.isbnFld.value, \
+ #           int(self.yearFld.value), publisher_num, DBcreationDate, genre, cover_type, price, config.fileRow[0])
+ #       cur.execute(sqlQuery, values)
+ #       conn.commit()
+ #       bs.notify("\n       Record saved", title="Message", form_color='STANDOUT', wrap=True, wide=False)
+ #       self.exitRxOrder(modified=True)
 
     def updateOKbtn_function(self):
         "OK button function under Update mode."

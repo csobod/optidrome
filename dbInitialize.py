@@ -96,6 +96,26 @@ def create_patient(conn):
         print(e)
 
 
+def create_rxorder(conn):
+    """
+    Create a new order into the rxorder table
+    :param conn:
+    :param rxorder:
+    :return: rxorder id
+    """
+    try:
+        job = 1
+        patient_mrn = 1
+        patient_name = 'John Doe'
+        creation_date = datetime.datetime.now().strftime(DATEFORMAT)
+        rxorder_data = [(job, patient_mrn, patient_name, creation_date)]
+        c = conn.cursor()
+        c.executemany('INSERT INTO "optidrome.rxorder" (job, patient_mrn, patient_name, creation_date) VALUES (?,?,?,?) ', rxorder_data)
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
 def main():
 
     sql_create_user_table = """
@@ -259,6 +279,7 @@ def main():
         create_table(conn, sql_create_rxorder_table)
         create_user(conn)
         create_patient(conn)
+        create_rxorder(conn)
         conn.close()
     else:
         print("Error! cannot create the database connection.")
