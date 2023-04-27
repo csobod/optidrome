@@ -85,14 +85,14 @@ class RxOrderForm(npyscreen.FormBaseNew):
 
         # Form fields
 
-        self.jobFld=self.add(bs.MyTitleText, name="Job №.", value="", relx=6, rely=4, begin_entry_at=13, editable=False)
-        self.creationDateFld=self.add(bs.TitleDateField, name="Creation date:", value="", format=DATEFORMAT, relx=22, rely=4, begin_entry_at=25, editable=False)
+        self.jobFld=self.add(bs.MyTitleText, name="Job №.", value="", relx=3, rely=2, begin_entry_at=9, editable=False)
+        self.creationDateFld=self.add(bs.TitleDateField, name="Created:", value="", format=DATEFORMAT, relx=3, rely=4, begin_entry_at=9, editable=False)
 
         self.patientValues = self.get_all_patients()
         self.patientFld=self.add(bs.TitleChooser, name="Patient:", value="", values=self.patientValues, popupType="narrow", \
-            relx=10, rely=7, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
+            relx=29, rely=3, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
             height=0, max_height=0, check_value_change=True, editable=False)
-        self.patientLabel=self.add(bs.MyFixedText, name="PatientLabel", value="[+]", relx=58, rely=7, min_width=4, max_width=4, \
+        self.patientLabel=self.add(bs.MyFixedText, name="PatientLabel", value="[+]", relx=68, rely=3, min_width=4, max_width=4, \
             min_height=0, max_height=0, use_max_space=False, editable=False)
 
         #self.vendorValues = self.get_all_vendors()
@@ -316,7 +316,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
         form.current_option = "Update"
         form.convertDBtoFields()
         form.jobFld.editable = True
-        form.jobFld.maximum_string_length = 6
+        form.jobFld.maximum_string_length = 4
         form.patientFld.editable = True
         form.creationDateFld.editable = True
         form.priceFld.editable = True
@@ -562,7 +562,7 @@ class RxOrderForm(npyscreen.FormBaseNew):
             return errorMsg
 
         # repeated value check: numeral and isbn fields
-        if self.jobFld.value != self.bu_job or self.isbnFld.value != self.bu_isbn:
+        if self.jobFld.value != self.bu_job:
             for row in config.fileRows:
                 self.ok_button.editing = False
                 # Already exists and it's not itself
@@ -570,11 +570,6 @@ class RxOrderForm(npyscreen.FormBaseNew):
                     self.editw = self.get_editw_number("Job №.") - 1
                     errorMsg = "Error:  Numeral already exists"
                     return errorMsg
-                # Already exists and it's not itself
-#                if row[2] == self.isbnFld.value and self.isbnFld.value != self.bu_isbn:
-#                    self.editw = self.get_editw_number("ISBN/SKU:") - 1
-#                    errorMsg = "Error:  ISBN/SKU already exists"
-#                    return errorMsg
 
     def exist_changes(self):
         "Checking for changes to the fields."
