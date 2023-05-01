@@ -95,6 +95,10 @@ class RxOrderForm(npyscreen.FormBaseNew):
         self.patientLabel=self.add(bs.MyFixedText, name="PatientLabel", value="[+]", relx=68, rely=3, min_width=4, max_width=4, \
             min_height=0, max_height=0, use_max_space=False, editable=False)
 
+        self.prescriptionFld=self.add(bs.TitleFilename, name="Prescription:", value="", relx=3, rely=6, begin_entry_at=15, editable=False)
+        self.prescriptionLabel=self.add(bs.MyFixedText, name="PrescriptionLabel", value="[+]", relx=68, rely=6, min_width=4, max_width=4, \
+            min_height=0, max_height=0, use_max_space=False, editable=False)
+        
         #self.vendorValues = self.get_all_vendors()
         #self.vendorFld=self.add(bs.TitleChooser, name="Vendor:", value="", values=self.vendorValues, popupType="narrow", \
         #    relx=10, rely=9, width=6, min_width=8, max_width=49, begin_entry_at=15, use_max_space=False, use_two_lines=False,\
@@ -146,6 +150,22 @@ class RxOrderForm(npyscreen.FormBaseNew):
         aux_list.sort(key=collator.getSortKey)
         patient_list = [(i,) for i in aux_list]
         return patient_list
+    
+    def get_all_prescriptions(self):
+        "Returns a list of prescriptions from DB that match chosen patient"
+        conn = config.conn
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM 'optidrome.prescription' WHERE patient = ? ORDER BY name", (self.patientFld.value,))
+        filerows = cur.fetchall()
+        prescription_list = []
+        for row in filerows:
+            prescription_list.append((row[0],))
+        # We need PyICU (=icu) to order unicode strings in Spanish, Catalan, French...
+        collator = icu.Collator.createInstance(icu.Locale(locale.getlocale()[0]))
+        aux_list = [i[0] for i in prescription_list]
+        aux_list.sort(key=collator.getSortKey)
+        prescription_list = [(i,) for i in aux_list]
+        return prescription_list
     
 #    def get_all_vendors(self):
 #        "Returns a list of vendors from DB where is_lab is False"

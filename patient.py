@@ -69,6 +69,7 @@ class PatientForm(npyscreen.FormBaseNew):
         self.notesFld=self.add(bs.MyTitleText, name="Notes:", value="", relx=9, rely=16, begin_entry_at=11, fixed_length=False, editable=False)
 
         # Form buttons
+        self.prescription_button=self.add(bs.MyMiniButtonPress, name="Prescriptions", relx=2, rely=19, editable=True)
         self.ok_button=self.add(bs.MyMiniButtonPress, name="  OK  ", relx=26, rely=19, editable=True)
         self.cancel_button=self.add(bs.MyMiniButtonPress, name="Cancel", relx=42, rely=19, editable=True)
 
@@ -119,6 +120,21 @@ class PatientForm(npyscreen.FormBaseNew):
         self.selectorForm.grid.update()
         config.parentApp.setNextForm("PATIENTSELECTOR")
         config.parentApp.switchFormNow()
+
+    def exitToPrescription(self):
+        "Exit record form to prescription selector form, filtering by patient."
+        self.update_fileRow()
+        self.selectorForm.update_grid()
+        self.backup_fields()
+
+        # To unlock the database (for Create) we must disconnect and re-connect:
+        config.conn.close()
+        self.parentApp.connect_database()
+
+        self.selectorForm.grid.update()
+        config.parentApp.setNextForm("PRESCRIPTIONSELECTOR")
+        config.parentApp.switchFormNow()
+
 
     def get_last_mrn(self):
         "Get the last mrn from the database."
@@ -264,6 +280,24 @@ class PatientForm(npyscreen.FormBaseNew):
         config.fileRow.append(self.emailFld.value)
         config.fileRow.append(self.addressFld.value)
         config.fileRow.append(self.notesFld.value)
+
+    def createPrescriptionbtn_function(self):
+        "Prescription button function under Create mode."
+        self.strip_fields()     # Get rid of spaces
+        error = self.check_fields_values()
+        if error:
+            self.error_message(error)
+            return
+        else:
+            if self.exist_changes():    # If there are changes, save them
+                self.save_mem_record()
+                self.save_created_patient()
+                self.exitToPrescription()
+                self.selectorForm.grid.set_highlight_row(int(self.mrnFld.value))
+            else:
+                self.exitPatient(modified=False)
+
+
     
     def createOKbtn_function(self):
         "OK button function under Create mode."
@@ -276,6 +310,7 @@ class PatientForm(npyscreen.FormBaseNew):
             if self.exist_changes():
                 self.save_mem_record()  # backup record in config variable
                 self.save_created_patient()
+                self.exitPatient(modified=True)
                 self.selectorForm.grid.set_highlight_row(int(self.mrnFld.value))
             else:
                 self.exitPatient(modified=False)
@@ -467,9 +502,7 @@ class PatientForm(npyscreen.FormBaseNew):
         new_record.append(self.emailFld.value)
         new_record.append(self.addressFld.value)
         new_record.append(self.notesFld.value)
-
         config.fileRows.append(new_record)
-        self.exitPatient(modified=True)
 
     def save_updated_patient(self):
         "Button based Save function for U=Update."
@@ -493,8 +526,6 @@ class PatientForm(npyscreen.FormBaseNew):
         except sqlite3.IntegrityError:
             bs.notify_OK("\n     MRN or name of patient already exists. ", "Message")
             return
-
-        self.exitPatient(modified=True)
         
     def updateOKbtn_function(self):
         "OK button function under Update mode."
@@ -506,6 +537,7 @@ class PatientForm(npyscreen.FormBaseNew):
         else:
             if self.exist_changes():
                 self.save_updated_patient()
+                self.exitPatient(modified=True)
                 self.selectorForm.grid.set_highlight_row(int(self.mrnFld.value))
             else:
                 self.selectorForm.grid.set_highlight_row(int(self.mrnFld.value))

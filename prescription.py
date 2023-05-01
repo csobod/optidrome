@@ -10,12 +10,11 @@
 # (http://www.freebsd.org/copyright/freebsd-license.html)
 ##############################################################################
 
-import datetime
+import curses
 import sqlite3
-from sqlite3 import Error
 import time
 
-import base64
+import npyscreen
 
 import bsWidgets as bs
 import config
@@ -31,7 +30,7 @@ helpText = "Stores patient prescriptions.\n\n" \
             "using a password that is stored in the configuration file.  "
 
 class PrescriptionForm(npyscreen.FormBaseNew):
-    "Prescription entry form called by patient form."
+    "Prescription entry form called by prescription selector form."
     def __init__(self, name="Prescription", parentApp=None, framed=None, help=None, color='FORMDEFAULT',\
         widget_list=None, cycle_widgets=False, ok_button_function=None, cancel_button_function=None, *args, **keywords):
 
@@ -41,7 +40,7 @@ class PrescriptionForm(npyscreen.FormBaseNew):
         global form
         form = self
 
-        self.selectorForm = self.parentApp._Forms['PATIENT']
+        self.selectorForm = self.parentApp._Forms['PRESCRIPTIONSELECTOR']
 
     def create(self):
         """The standard constuctor will call the method .create(), which you should override to create your widgets."""
